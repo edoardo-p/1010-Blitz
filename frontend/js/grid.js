@@ -98,5 +98,7 @@ class Grid {
                 this.tiles[i][col].update(0);
             }
         });
+
+        score += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
     }
 }
