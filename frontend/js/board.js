@@ -2,31 +2,42 @@ class Board {
 
     constructor() {
         this.spacing = 10
-        this.scoreLC = createVector(50,10)
-        this.scoreWidth = 500;
+        this.width = 500;
+
+        this.scoreCoords = [300, 60];
         this.scoreHeight = 100;
-        this.boardLC = createVector(50,this.scoreLC.y + this.scoreHeight + this.spacing);
-        this.boardWidth = this.scoreWidth;
-        this.boardHeight = this.boardWidth;
-        this.pieceLC = createVector(50,this.boardLC.y + this.boardHeight + this.spacing)
-        this.pieceWidth = this.boardWidth;
+
+        this.boardCoords = [300, 370];
+        this.boardHeight = 500;
+
+        this.piecesCoords = [300, 705];
         this.pieceHeight = 150;
+
         this.colour = color(255);
-        this.grid = new Grid(this.boardLC.x, this.boardLC.y);
+        this.grid = [10, 10];
+
+        this.tileSize = 48;
+        this.radius = 5;
     }
 
     show() {
-        noStroke();
         fill(this.colour);
-        rect(this.scoreLC.x, this.scoreLC.y, this.scoreWidth, this.scoreHeight);
-        rect(this.boardLC.x, this.boardLC.y, this.boardWidth, this.boardHeight);
-        rect(this.pieceLC.x, this.pieceLC.y, this.pieceWidth, this.pieceHeight);
-        this.grid.show();
+        rect(this.scoreCoords[0], this.scoreCoords[1], this.width, this.scoreHeight);
+        rect(this.boardCoords[0], this.boardCoords[1], this.width, this.boardHeight);
+        rect(this.piecesCoords[0], this.piecesCoords[1], this.width, this.pieceHeight);
+        fill(128);
+        for (let x = 0; x < this.grid[0]; x++){
+            for (let y = 0; y < this.grid[1]; y++){
+                rect(this.boardCoords[0] - 225 + x * 50, this.boardCoords[1] - 225 + y * 50, this.tileSize, this.tileSize, this.radius);
+            }
+        }   
     }
 
     updateScore(score) {
         textSize(50);
-        text(score, this.scoreLC.x + 100, this.scoreLC.y + 70)
+        textAlign(CENTER, CENTER);
+        fill(0);
+        text(score, this.scoreCoords[0], this.scoreCoords[1])
 
     }
 }
