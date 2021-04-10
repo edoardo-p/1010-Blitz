@@ -2,17 +2,16 @@ class Tile {
   constructor(x, y, colour) {
     this.pos = createVector(x, y);
     this.colour = colour;
-    this.width = 50;
-    this.height = 50;
-    this.radius = 10;
-    this.padding = 5;
+    this.side = 50;
+    this.radius = 5;
+    this.padding = 10;
   }
 
   show() {
-    let padded = this.padding / 2;
-    fill(0);
-    rect(this.pos.x, this.pos.y, this.width, this.height);
+    rectMode(CENTER);
+    let centerX = this.side / 2 + this.pos.x;
+    let centerY = this.side / 2 + this.pos.y;
     fill(this.colour);
-    rect(this.pos.x + padded, this.pos.y + padded, this.width - 2 * padded, this.height - 2 * padded, this.radius);
+    rect(centerX, centerY, this.side - this.padding, this.side - this.padding, this.radius);
   }
 }

@@ -12,6 +12,7 @@ class Board {
         this.pieceWidth = this.boardWidth;
         this.pieceHeight = 150;
         this.colour = color(255);
+        this.grid = new Grid(this.boardLC.x, this.boardLC.y);
     }
 
     show() {
@@ -19,7 +20,8 @@ class Board {
         fill(this.colour);
         rect(this.scoreLC.x, this.scoreLC.y, this.scoreWidth, this.scoreHeight);
         rect(this.boardLC.x, this.boardLC.y, this.boardWidth, this.boardHeight);
-        rect(this.pieceLC.x, this.pieceLC.y, this.pieceWidth, this.pieceHeight);  
+        rect(this.pieceLC.x, this.pieceLC.y, this.pieceWidth, this.pieceHeight);
+        this.grid.show();
     }
 
     updateScore(score) {
