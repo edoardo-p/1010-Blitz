@@ -13,7 +13,7 @@ function setup() {
 }
 
 function draw() {
-  background(128);
+  background(0);
   noStroke();
   rectMode(CENTER);
 
@@ -37,6 +37,11 @@ function draw() {
       score += piece.tiles.length;
       if (pieces.length === 0) {
         pieces = generatePieces();
+      }
+      if (grid.hasLost(pieces)) {
+        board.updateScore(`Game Over!\nFinal score: ${score}`);
+        grid.update();
+        noLoop();
       }
       isHolding = false;
     }
