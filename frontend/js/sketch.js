@@ -15,16 +15,12 @@ function draw() {
   rectMode(CENTER);
   board.show();
   board.updateScore("hi");
-  piece.update(mouseX, mouseY);
-  // if (mouseIsPressed) {
-  //   grid.update(mouseX, mouseY, piece);
-  // }
+  if (mouseIsPressed) {
+    grid.update(mouseX, mouseY, piece);
+    piece = new Piece(0, 0, getRandomPiece());
+  }
   grid.show();
-}
-
-function mouseClicked() {
-  grid.update(mouseX, mouseY, piece);
-  piece = new Piece(0, 0, getRandomPiece());
+  piece.update(mouseX, mouseY);
 }
 
 function getRandomPiece() {

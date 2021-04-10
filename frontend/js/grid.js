@@ -1,17 +1,13 @@
 class Grid {
 
-    constructor(topX, topY, width=10, height=10) {
-        this.size = 48;
-        this.radius = 5;
+    constructor(topX, topY) {
         this.topX = topX;
         this.topY = topY;
-        this.width = width;
-        this.height = height;
         this.tiles = [];
 
-        for (let x = 0; x < width; x++) {
+        for (let x = 0; x < boardSize; x++) {
             let temp = [];
-            for (let y = 0; y < height; y++) {
+            for (let y = 0; y < boardSize; y++) {
                 temp.push(new Tile()); 
             }
             this.tiles.push(temp);
@@ -24,7 +20,7 @@ class Grid {
                 let tile = this.tiles[row][col];
                 if (!tile.empty) {
                     fill(tile.colour);
-                    rect(this.topX + col * 50, this.topY + row * 50, this.size, this.size, this.radius);
+                    rect(this.topX + col * 50, this.topY + row * 50, size, size, radius);
                 }
             }
         }
@@ -61,6 +57,44 @@ class Grid {
     }
 
     checkLines() {
-        
+        let fullRows = [];
+        let fullCols = [];
+        for (var row = 0; row < this.tiles.length; row++) {
+            for (var col = 0; col < this.tiles.length; col++) {
+                if (this.tiles[row][col].empty) {
+                    break;
+                }
+            }
+            if (col === 10) {
+                fullRows.push(row);
+            }
+        }
+
+        for (var col = 0; col < this.tiles.length; col++) {
+            for (var row = 0; row < this.tiles.length; row++) {
+                if (this.tiles[row][col].empty) {
+                    break;
+                }
+            }
+            if (row === 10) {
+                fullCols.push(col);
+            }
+        }
+
+        this.clearLines(fullRows, fullCols);
+    }
+
+    clearLines(fullRows, fullCols) {
+        fullRows.forEach(row => {
+            for (let i = 0; i < boardSize; i++) {
+                this.tiles[row][i].update(0);
+            }
+        });
+
+        fullCols.forEach(col => {
+            for (let i = 0; i < boardSize; i++) {
+                this.tiles[i][col].update(0);
+            }
+        });
     }
 }
