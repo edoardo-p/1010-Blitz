@@ -1,5 +1,6 @@
 {
   "include": [
     "js/*.js",
-    "libraries/*.js"]
+    "libraries/*.js"
+  ]
 }
