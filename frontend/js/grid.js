@@ -51,9 +51,9 @@ class Grid {
             return false;
         }
         for (let i = 0; i < piece.tiles.length; i++) {
-            let actualRow = piece.tiles[i][0] + Math.floor((x - 50) / 50);
-            let actualCol = piece.tiles[i][1] + Math.floor((y - 120) / 50);
-            if (actualRow < 0 || actualRow >= this.tiles.length || actualCol < 0 || actualCol >= this.tiles.length) {
+            let actualCol = piece.tiles[i][0] + Math.floor((x - 50) / 50);
+            let actualRow = piece.tiles[i][1] + Math.floor((y - 120) / 50);
+            if (actualRow < 0 || actualRow >= this.tiles.length || actualCol < 0 || actualCol >= this.tiles.length || !this.tiles[actualRow][actualCol].empty) {
                 return false;
             }
         }
