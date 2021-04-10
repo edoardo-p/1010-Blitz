@@ -31,11 +31,33 @@ class Grid {
     }
     
     update(x, y, piece) {
-        piece.tiles.forEach(coords => {
-            console.log(coords);
-            this.tiles[coords[1] + x][coords[0] + y].update(piece.colour);
-        });
-        this.checkLines();
+        if (this.checkValid(x, y, piece)) {
+            let row = Math.floor((x - 50) / 50);
+            let col = Math.floor((y - 120) / 50);
+        
+            piece.tiles.forEach(coords => {
+                let actualRow = coords[0] + row;
+                let actualCol = coords[1] + col;
+                if (actualRow >= 0 && actualRow < boardSize && actualCol >= 0 && actualCol < boardSize) {
+                    this.tiles[coords[1] + col][coords[0] + row].update(piece.colour);
+                }
+            });
+            this.checkLines();
+        }
+    }
+
+    checkValid(x, y, piece) {
+        if (x < 50 || x > 550 || y < 120 || y > 620) {
+            return false;
+        }
+        for (let i = 0; i < piece.tiles.length; i++) {
+            let actualRow = piece.tiles[i][0] + Math.floor((x - 50) / 50);
+            let actualCol = piece.tiles[i][1] + Math.floor((y - 120) / 50);
+            if (actualRow < 0 || actualRow >= this.tiles.length || actualCol < 0 || actualCol >= this.tiles.length) {
+                return false;
+            }
+        }
+        return true;
     }
 
     checkLines() {
