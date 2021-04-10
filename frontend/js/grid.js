@@ -39,7 +39,9 @@ class Grid {
                 }
             });
             this.checkLines();
+            return true;
         }
+        return false;
     }
 
     checkValid(x, y, piece) {
