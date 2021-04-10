@@ -1,15 +1,15 @@
 class Piece {
-  constructor(x, y, piece) {
-    this.x = x;
-    this.y = y;
+  constructor(piece) {
     this.tiles = piece.pos;
     this.colour = piece.colour;
   }
 
-  show() {
-    this.tiles.forEach(pos => {
-      let tile = new Tile(this.x + pos[0], this.y + pos[1], this.colour);
-      tile.show();
+  update(x, y, scale=1) {
+    this.tiles.forEach(tile => {
+      let centerX = tile[0] * 50 * scale + x;
+      let centerY = tile[1] * 50 * scale + y;
+      fill(this.colour);
+      rect(centerX, centerY, size * scale, size * scale, radius);
     });
   }
 }

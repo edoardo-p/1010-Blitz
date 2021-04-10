@@ -14,10 +14,6 @@ class Board {
         this.pieceHeight = 150;
 
         this.colour = color(255);
-        this.grid = [10, 10];
-
-        this.tileSize = 48;
-        this.radius = 5;
     }
 
     show() {
@@ -26,11 +22,11 @@ class Board {
         rect(this.boardCoords[0], this.boardCoords[1], this.width, this.boardHeight);
         rect(this.piecesCoords[0], this.piecesCoords[1], this.width, this.pieceHeight);
         fill(128);
-        for (let x = 0; x < this.grid[0]; x++){
-            for (let y = 0; y < this.grid[1]; y++){
-                rect(this.boardCoords[0] - 225 + x * 50, this.boardCoords[1] - 225 + y * 50, this.tileSize, this.tileSize, this.radius);
+        for (let x = 0; x < boardSize; x++){
+            for (let y = 0; y < boardSize; y++){
+                rect(this.boardCoords[0] - 225 + x * 50, this.boardCoords[1] - 225 + y * 50, size, size, radius);
             }
-        }   
+        }
     }
 
     updateScore(score) {
