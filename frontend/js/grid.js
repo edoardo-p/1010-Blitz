@@ -7,14 +7,14 @@ class Grid {
         this.distance = 50;
         this.spacing = 5;
         this.chamfer = 5;
-        this.grid = createVector(10, 10);
+        this.grid = [10, 10];
     }
 
     show(){
         noStroke();
         fill(this.colour);
-        for (let x = 0; x < this.grid.x; x++){
-            for (let y = 0; y < this.grid.y; y++){
+        for (let x = 0; x < this.grid[0]; x++){
+            for (let y = 0; y < this.grid[1]; y++){
                 rect(this.gridLC.x + this.distance * x, this.gridLC.y + this.distance * y, this.size, this.size, this.chamfer);
             }
         }       
