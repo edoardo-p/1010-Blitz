@@ -1,10 +1,16 @@
 function setup() {
   createCanvas(600, 800);
-  piece = new Piece(100, 100, _J);
+  board = new Board();
+  piece = new Piece(board.boardLC.x, board.boardLC.y, _J);
 }
 
 function draw() {
-  background(120);
+  background(128);
+  board.show();
+  board.updateScore("hi");
+
+
+
   noStroke();
   piece.show();
   noLoop();
