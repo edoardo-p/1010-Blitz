@@ -2,6 +2,8 @@ const boardSize = 10;
 const size = 47;
 const radius = 8;
 
+var score = 0;
+
 function setup() {
   createCanvas(600, 800);
   board = new Board();
@@ -11,12 +13,12 @@ function setup() {
 }
 
 function draw() {
-  background(128);
+  background(0);
   noStroke();
   rectMode(CENTER);
 
   board.show();
-  board.updateScore("hi");
+  board.updateScore(score);
   drawPiecesArray();
   grid.show();
 
@@ -32,8 +34,14 @@ function draw() {
   if (mouseIsPressed && isHolding) {
     let success = grid.update(mouseX, mouseY, piece);
     if (success) {
+      score += piece.tiles.length;
       if (pieces.length === 0) {
         pieces = generatePieces();
+      }
+      if (grid.hasLost(pieces)) {
+        board.updateScore(`Game Over!\nFinal score: ${score}`);
+        grid.update();
+        noLoop();
       }
       isHolding = false;
     }

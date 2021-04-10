@@ -98,5 +98,22 @@ class Grid {
                 this.tiles[i][col].update(0);
             }
         });
+
+        score += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
+    }
+
+    hasLost(pieces) {
+        for (let i = 0; i < pieces.length; i++) {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    let x = col * 50 + 50;
+                    let y = row * 50 + 120;
+                    if (this.checkValid(x, y, pieces[i])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
