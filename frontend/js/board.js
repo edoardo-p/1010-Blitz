@@ -30,7 +30,7 @@ class Board {
             for (let y = 0; y < this.grid[1]; y++){
                 rect(this.boardCoords[0] - 225 + x * 50, this.boardCoords[1] - 225 + y * 50, this.tileSize, this.tileSize, this.radius);
             }
-        }   
+        }
     }
 
     updateScore(score) {

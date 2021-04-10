@@ -1,22 +1,44 @@
 class Grid {
 
-    constructor(x, y) {
-        this.gridLC = createVector(x + 5, y + 5);
-        this.colour = color(255,180,0);
-        this.size = 40;
-        this.distance = 50;
-        this.spacing = 5;
-        this.chamfer = 5;
-        this.grid = [10, 10];
+    constructor(topX, topY, width=10, height=10) {
+        this.size = 48;
+        this.radius = 5;
+        this.topX = topX;
+        this.topY = topY;
+        this.width = width;
+        this.height = height;
+        this.tiles = [];
+
+        for (let x = 0; x < width; x++) {
+            let temp = [];
+            for (let y = 0; y < height; y++) {
+                temp.push(new Tile()); 
+            }
+            this.tiles.push(temp);
+        }
     }
 
-    show(){
-        noStroke();
-        fill(this.colour);
-        for (let x = 0; x < this.grid[0]; x++){
-            for (let y = 0; y < this.grid[1]; y++){
-                rect(this.gridLC.x + this.distance * x, this.gridLC.y + this.distance * y, this.size, this.size, this.chamfer);
+    show() {
+        for (let row = 0; row < this.tiles.length; row++) {
+            for (let col = 0; col < this.tiles.length; col++) {
+                let tile = this.tiles[row][col];
+                if (!tile.empty) {
+                    fill(tile.colour);
+                    rect(this.topX + col * 50, this.topY + row * 50, this.size, this.size, this.radius);
+                }
             }
-        }       
+        }
+    }
+    
+    update(x, y, piece) {
+        piece.tiles.forEach(coords => {
+            console.log(coords);
+            this.tiles[coords[1] + x][coords[0] + y].update(piece.colour);
+        });
+        this.checkLines();
+    }
+
+    checkLines() {
+        
     }
 }

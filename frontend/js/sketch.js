@@ -1,7 +1,8 @@
 function setup() {
   createCanvas(600, 800);
   board = new Board();
-  // piece = new Piece(board.boardLC.x, board.boardLC.y, _J);
+  grid = new Grid(75, 145, 10, 10);
+  piece = new Piece(4, 4, _L);
 }
 
 function draw() {
@@ -10,8 +11,8 @@ function draw() {
   rectMode(CENTER);
   board.show();
   board.updateScore("hi");
-
-
+  grid.update(piece.x, piece.y, piece);
+  grid.show();
 
   // piece.show();
   noLoop();
