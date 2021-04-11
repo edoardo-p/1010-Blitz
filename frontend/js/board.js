@@ -10,16 +10,11 @@ class Board {
         this.boardCoords = [300, 370];
         this.boardHeight = 500;
 
-        this.piecesCoords = [300, 705];
-        this.pieceHeight = 150;
-
-        this.colour = color(0);
+        this.timerColour = color(255, 0, 0);
+        this.textColour = color(0, 100, 200);
     }
 
     show() {
-        fill(this.colour);
-        rect(this.boardCoords[0], this.boardCoords[1], this.width, this.boardHeight);
-        rect(this.piecesCoords[0], this.piecesCoords[1], this.width, this.pieceHeight);
         fill(40);
         for (let x = 0; x < boardSize; x++){
             for (let y = 0; y < boardSize; y++){
@@ -29,17 +24,16 @@ class Board {
     }
     
     updateHeader(score) {
-        fill(this.colour);
-        rect(this.scoreCoords[0], this.scoreCoords[1], this.width, this.scoreHeight);
-        fill(255, 0, 0);
+        fill(this.timerColour);
         let timerWidth = map(timeLeft, 0, 60, 0, 500);
         if (timerWidth < 0) {
             timerWidth = 0;
         }
         rect(timerWidth / 2 + 50, 107, timerWidth, 3);
+
+        fill(this.textColour);
         textSize(50);
         textAlign(CENTER, CENTER);
-        fill(0, 100, 200);
         text(score, this.scoreCoords[0], this.scoreCoords[1])
     }
 }

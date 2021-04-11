@@ -22,7 +22,6 @@ function draw() {
   board.updateHeader(score);
   drawPiecesArray();
   grid.show();
-  console.log(keyCode);
   
   if (mouseIsPressed && !isHolding) {
     if (mouseY >= 630 && mouseY <= 780) {
