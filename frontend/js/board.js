@@ -13,27 +13,33 @@ class Board {
         this.piecesCoords = [300, 705];
         this.pieceHeight = 150;
 
-        this.colour = color(255);
+        this.colour = color(0);
     }
 
     show() {
         fill(this.colour);
-        rect(this.scoreCoords[0], this.scoreCoords[1], this.width, this.scoreHeight);
         rect(this.boardCoords[0], this.boardCoords[1], this.width, this.boardHeight);
         rect(this.piecesCoords[0], this.piecesCoords[1], this.width, this.pieceHeight);
-        fill(128);
+        fill(40);
         for (let x = 0; x < boardSize; x++){
             for (let y = 0; y < boardSize; y++){
                 rect(this.boardCoords[0] - 225 + x * 50, this.boardCoords[1] - 225 + y * 50, size, size, radius);
             }
         }
     }
-
-    updateScore(score) {
+    
+    updateHeader(score) {
+        fill(this.colour);
+        rect(this.scoreCoords[0], this.scoreCoords[1], this.width, this.scoreHeight);
+        fill(255, 0, 0);
+        let timerWidth = map(timeLeft, 0, 60, 0, 500);
+        if (timerWidth < 0) {
+            timerWidth = 0;
+        }
+        rect(timerWidth / 2 + 50, 107, timerWidth, 3);
         textSize(50);
         textAlign(CENTER, CENTER);
-        fill(0);
+        fill(0, 100, 200);
         text(score, this.scoreCoords[0], this.scoreCoords[1])
-
     }
 }

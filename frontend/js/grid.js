@@ -1,16 +1,20 @@
 class Grid {
 
-    constructor(topX, topY) {
+    constructor(topX, topY, tiles=undefined) {
         this.topX = topX;
         this.topY = topY;
-        this.tiles = [];
+        this.tiles = tiles;
 
-        for (let x = 0; x < boardSize; x++) {
-            let temp = [];
-            for (let y = 0; y < boardSize; y++) {
-                temp.push(new Tile()); 
+        if (tiles === undefined) {
+            this.tiles = [];
+
+            for (let x = 0; x < boardSize; x++) {
+                let temp = [];
+                for (let y = 0; y < boardSize; y++) {
+                    temp.push(new Tile()); 
+                }
+                this.tiles.push(temp);
             }
-            this.tiles.push(temp);
         }
     }
 
@@ -28,15 +32,10 @@ class Grid {
     
     update(x, y, piece) {
         if (this.checkValid(x, y, piece)) {
-            let row = Math.floor((x - 50) / 50);
-            let col = Math.floor((y - 120) / 50);
-        
             piece.tiles.forEach(coords => {
-                let actualRow = coords[0] + row;
-                let actualCol = coords[1] + col;
-                if (actualRow >= 0 && actualRow < boardSize && actualCol >= 0 && actualCol < boardSize) {
-                    this.tiles[coords[1] + col][coords[0] + row].update(piece.colour);
-                }
+                let actualRow = coords[1] + y;
+                let actualCol = coords[0] + x;
+                this.tiles[actualRow][actualCol].update(piece.colour);
             });
             this.checkLines();
             return true;
@@ -45,12 +44,9 @@ class Grid {
     }
 
     checkValid(x, y, piece) {
-        if (x < 50 || x > 550 || y < 120 || y > 620) {
-            return false;
-        }
         for (let i = 0; i < piece.tiles.length; i++) {
-            let actualCol = piece.tiles[i][0] + Math.floor((x - 50) / 50);
-            let actualRow = piece.tiles[i][1] + Math.floor((y - 120) / 50);
+            let actualCol = piece.tiles[i][0] + x;
+            let actualRow = piece.tiles[i][1] + y;
             if (actualRow < 0 || actualRow >= this.tiles.length || actualCol < 0 || actualCol >= this.tiles.length || !this.tiles[actualRow][actualCol].empty) {
                 return false;
             }
@@ -98,5 +94,24 @@ class Grid {
                 this.tiles[i][col].update(0);
             }
         });
+
+        score += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
+        timeLeft += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
+        if (timeLeft > 60) {
+            timeLeft = 60;
+        }
+    }
+
+    hasLost(pieces) {
+        for (let i = 0; i < pieces.length; i++) {
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize; col++) {
+                    if (this.checkValid(row, col, pieces[i])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

@@ -2,24 +2,28 @@ const boardSize = 10;
 const size = 47;
 const radius = 8;
 
+var timeLeft = 30;
+var score = 0;
+
 function setup() {
   createCanvas(600, 800);
   board = new Board();
-  grid = new Grid(75, 145, boardSize, boardSize);
+  grid = new Grid(75, 145);
   isHolding = false;
   pieces = generatePieces();
 }
 
 function draw() {
-  background(128);
+  background(0);
   noStroke();
   rectMode(CENTER);
-
+  timeLeft -= 1 / 60;
   board.show();
-  board.updateScore("hi");
+  board.updateHeader(score);
   drawPiecesArray();
   grid.show();
-
+  console.log(keyCode);
+  
   if (mouseIsPressed && !isHolding) {
     if (mouseY >= 630 && mouseY <= 780) {
       let slot = Math.floor((mouseX - 50) / 187.5);
@@ -30,19 +34,38 @@ function draw() {
   }
 
   if (mouseIsPressed && isHolding) {
-    let success = grid.update(mouseX, mouseY, piece);
+    let [x, y] = convert(mouseX, mouseY);
+    let success = grid.update(x, y, piece);
     if (success) {
+      score += piece.tiles.length;
+      timeLeft += piece.tiles.length;
+        if (timeLeft > 60) {
+          timeLeft = 60;
+        }
       if (pieces.length === 0) {
         pieces = generatePieces();
+      }
+      if (grid.hasLost(pieces)) {
+        board.updateHeader(`Game Over!\nFinal score: ${score}`);
+        grid.update();
+        noLoop();
       }
       isHolding = false;
     }
   }
   
   if (isHolding) {
+    if (keyIsPressed && keyCode === 32) {
+      isHolding = false;
+      pieces.push(piece);
+    }
     piece.update(mouseX, mouseY);
   }
-  
+
+  if (timeLeft <= 0) {
+    board.updateHeader(`Time's up!\nFinal score: ${score}`);
+    noLoop();
+  }
 }
 
 function drawPiecesArray() {
@@ -58,4 +81,10 @@ function generatePieces() {
     new Piece(random(pieces)),
     new Piece(random(pieces))
   ];
+}
+
+function convert(x, y) {
+  let newX = Math.floor((x - 50) / 50);
+  let newY = Math.floor((y - 120) / 50);
+  return [newX, newY];
 }
