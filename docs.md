@@ -3,7 +3,7 @@
 
 ## What we achieved
 Were unable to implement AI solver in time, but had planned to try all possible next moves and play highest scoring following a set of criteria
-Wrote 1010 game using p5.js – great for UI work
+Wrote 1010 game using `p5.js` – great for UI work
 Had very close functionality to original 1010
 We added a timer to create a “blitz” mode
 
@@ -15,12 +15,12 @@ We added a timer to create a “blitz” mode
  - After placement game checks for any completed lines and removes them 
  - Also awards score based on size of piece and lines cleared
  - Scoring points increases remaining time
- - Game is drawn using coordinates relative to window but game logic is performed in 10 x 10 array with unit coordinates ((0,0), (1,6), (9,9))
+ - Game is drawn using coordinates relative to window but game logic is performed in `10 x 10` array with unit coordinates `((0,0), (1,6), (9,9))`
  - Pieces are defined as series of relative unit coordinates to their grips
  - Game converts user input coordinates into unit game space to apply logic and then converts results of logic back into window coordinates to draw
 
 ## Features:
- - Time out – Timer starts at 30s, scoring points increases time remaining, 1 point =  1sec, max time cap 60s if timer hits 0 you lose
+ - Time out – Timer starts at 30s, scoring points increases time remaining, 1 point =  1s, max time cap 60s if timer hits 0 you lose
  - No more moves, if placing a piece leaves you with no possible positions for any of your remaining pieces you lose
  - Losing freezes the game and prints your final score at the top of the board
 
