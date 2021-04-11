@@ -45,8 +45,10 @@ function draw() {
         pieces = generatePieces();
       }
       if (grid.hasLost(pieces)) {
+        drawPiecesArray();
+        grid.update(x, y, piece);
+        grid.show()
         board.updateHeader(`Game Over!\nFinal score: ${score}`);
-        grid.update();
         noLoop();
       }
       isHolding = false;
