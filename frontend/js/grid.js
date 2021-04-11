@@ -96,6 +96,10 @@ class Grid {
         });
 
         score += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
+        timeLeft += 5 * (fullRows.length + fullCols.length) * (fullRows.length + fullCols.length + 1);
+        if (timeLeft > 60) {
+            timeLeft = 60;
+        }
     }
 
     hasLost(pieces) {

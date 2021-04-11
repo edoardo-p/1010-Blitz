@@ -28,9 +28,15 @@ class Board {
         }
     }
     
-    updateScore(score) {
+    updateHeader(score) {
         fill(this.colour);
         rect(this.scoreCoords[0], this.scoreCoords[1], this.width, this.scoreHeight);
+        fill(255, 0, 0);
+        let timerWidth = map(timeLeft, 0, 60, 0, 500);
+        if (timerWidth < 0) {
+            timerWidth = 0;
+        }
+        rect(timerWidth / 2 + 50, 107, timerWidth, 3);
         textSize(50);
         textAlign(CENTER, CENTER);
         fill(0, 100, 200);

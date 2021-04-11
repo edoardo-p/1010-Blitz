@@ -2,6 +2,7 @@ const boardSize = 10;
 const size = 47;
 const radius = 8;
 
+var timeLeft = 30;
 var score = 0;
 
 function setup() {
@@ -10,19 +11,18 @@ function setup() {
   grid = new Grid(75, 145);
   isHolding = false;
   pieces = generatePieces();
-  agent = new Agent(new Grid(75, 145), pieces);
-  agent.nextMove();
 }
 
 function draw() {
   background(0);
   noStroke();
   rectMode(CENTER);
-  
+  timeLeft -= 1 / 60;
   board.show();
-  board.updateScore(score);
+  board.updateHeader(score);
   drawPiecesArray();
   grid.show();
+  console.log(keyCode);
   
   if (mouseIsPressed && !isHolding) {
     if (mouseY >= 630 && mouseY <= 780) {
@@ -38,11 +38,15 @@ function draw() {
     let success = grid.update(x, y, piece);
     if (success) {
       score += piece.tiles.length;
+      timeLeft += piece.tiles.length;
+        if (timeLeft > 60) {
+          timeLeft = 60;
+        }
       if (pieces.length === 0) {
         pieces = generatePieces();
       }
       if (grid.hasLost(pieces)) {
-        board.updateScore(`Game Over!\nFinal score: ${score}`);
+        board.updateHeader(`Game Over!\nFinal score: ${score}`);
         grid.update();
         noLoop();
       }
@@ -51,7 +55,16 @@ function draw() {
   }
   
   if (isHolding) {
+    if (keyIsPressed && keyCode === 32) {
+      isHolding = false;
+      pieces.push(piece);
+    }
     piece.update(mouseX, mouseY);
+  }
+
+  if (timeLeft <= 0) {
+    board.updateHeader(`Time's up!\nFinal score: ${score}`);
+    noLoop();
   }
 }
 
@@ -63,7 +76,6 @@ function drawPiecesArray() {
 
 function generatePieces() {
   let pieces = [_11, _22, _33, _12, _13, _14, _15, _21, _31, _41, _51, _r, _t, _l, _j, _R, _T, _L, _J];
-  // let pieces = [_33];
   return [
     new Piece(random(pieces)),
     new Piece(random(pieces)),
@@ -75,20 +87,4 @@ function convert(x, y) {
   let newX = Math.floor((x - 50) / 50);
   let newY = Math.floor((y - 120) / 50);
   return [newX, newY];
-}
-
-function gridMask(grid) {
-  let tiling = [];
-  for (let row = 0; row < boardSize; row++) {
-    let temp = [];
-    for (let col = 0; col < boardSize; col++) {
-      if (grid.tiles[row][col].empty) { 
-        temp.push(0);
-      } else {
-        temp.push(1);
-      }
-    }
-    tiling.push(temp);
-  }
-  return tiling;
 }
