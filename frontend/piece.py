@@ -13,7 +13,7 @@ class Piece:
         self.x = x
         self.y = y
 
-    def show(self, scale: float, screen: pygame.Surface):
+    def show(self, scale: float, screen: pygame.surface.Surface):
         for tile in self.tiles:
             pygame.draw.rect(
                 screen,

@@ -11,7 +11,7 @@ class Board:
         self.bgd_colour = pygame.Color(40, 40, 40)
         self.text_colour = pygame.Color(0, 100, 200)
 
-    def show(self, score: int, screen: pygame.Surface):
+    def show(self, score: int, screen: pygame.surface.Surface):
         font = pygame.font.Font(None, 50)
         text_surface = font.render(str(score), True, self.text_colour)
         screen.blit(text_surface, (20, 20))

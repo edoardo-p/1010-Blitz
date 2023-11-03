@@ -1,7 +1,7 @@
 import pygame
 from constants import BOARD_SIZE, RADIUS, SPACING, TILE_SIZE
-from tile import Tile
 from piece import Piece
+from tile import Tile
 
 
 class Grid:
@@ -10,7 +10,7 @@ class Grid:
         self.y = y
         self.tiles = [[Tile() for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
 
-    def show(self, screen: pygame.Surface):
+    def show(self, screen: pygame.surface.Surface):
         for y, row in enumerate(self.tiles):
             for x, tile in enumerate(row):
                 if not tile.empty:

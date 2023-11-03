@@ -13,7 +13,7 @@ del f
 
 
 def draw_piece_menu(
-    pieces: list[Piece], available_slots: list[bool], screen: pygame.Surface
+    pieces: list[Piece], available_slots: list[bool], screen: pygame.surface.Surface
 ):
     for i, (piece, available) in enumerate(zip(pieces, available_slots)):
         if not available:
