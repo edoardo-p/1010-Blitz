@@ -67,7 +67,7 @@ class Grid:
                 if self.tiles[row][col].empty:
                     break
 
-                if col == 9:
+                if col + 1 == BOARD_SIZE:
                     full_rows.append(row)
 
         for col in range(len(self.tiles)):
@@ -75,7 +75,7 @@ class Grid:
                 if self.tiles[row][col].empty:
                     break
 
-                if row == 9:
+                if row + 1 == BOARD_SIZE:
                     full_cols.append(col)
 
         return self._clear_lines(full_rows, full_cols)

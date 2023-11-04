@@ -3,7 +3,7 @@ import random
 
 import pygame
 from board import Board
-from constants import TILE_SIZE
+from constants import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH
 from grid import Grid
 from piece import Piece
 
@@ -13,36 +13,36 @@ del f
 
 
 def draw_piece_menu(
-    pieces: list[Piece], available_slots: list[bool], screen: pygame.surface.Surface
+    pieces: list[Piece], draw_mask: list[bool], screen: pygame.surface.Surface
 ):
-    for i, (piece, available) in enumerate(zip(pieces, available_slots)):
-        if not available:
+    for i, (piece, to_draw) in enumerate(zip(pieces, draw_mask)):
+        if not to_draw:
             continue
-        piece.update(50 + i * 100, 350)
+        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
         piece.show(0.5, screen)
 
 
 def generatePieces() -> list[Piece]:
     pieces = []
     for _ in range(3):
-        piece = random.choice(piece_vectors[1:2])
+        piece = random.choice(piece_vectors)
         pieces.append(Piece(piece["pos"], pygame.Color(piece["color"])))
 
     return pieces
 
 
 def convert(x: int, y: int) -> tuple[int, int]:
-    new_x = (x - 20) // TILE_SIZE
-    new_y = (y - 60) // TILE_SIZE
+    new_x = (x - GRID_X) // TILE_SIZE
+    new_y = (y - GRID_Y) // TILE_SIZE
     return new_x, new_y
 
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((300, 400))
+    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
     board = Board()
-    grid = Grid(20, 60)
+    grid = Grid(GRID_X, GRID_Y)
     is_holding = False
     pieces = generatePieces()
     available_slots = [True, True, True]
@@ -60,8 +60,8 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN and not is_holding:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                if board.height + board.y <= mouse_y <= 400:
-                    slot = mouse_x // 100
+                if GRID_HEIGHT + GRID_Y <= mouse_y <= WIN_HEIGHT:
+                    slot = 3 * mouse_x // WIN_WIDTH
                     if available_slots[slot]:
                         piece = pieces[slot]
                         available_slots[slot] = False
@@ -78,6 +78,7 @@ def main():
                         available_slots = [True, True, True]
 
                     if grid.has_lost(pieces):
+                        print("You lost!")
                         draw_piece_menu(pieces, available_slots, screen)
                         grid.update(x, y, piece)
                         grid.show(screen)
