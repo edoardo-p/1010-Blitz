@@ -34,6 +34,18 @@ class Grid:
 
         return 0
 
+    def has_lost(self, pieces: list[Piece]) -> bool:
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
+                if not self.tiles[row][col].empty:
+                    continue
+
+                for piece in pieces:
+                    if self._check_valid(row, col, piece):
+                        return False
+
+        return True
+
     def _check_valid(self, row: int, col: int, piece: Piece) -> bool:
         for tile_col, tile_row in piece.tiles:
             curr_row = row + tile_row
@@ -75,19 +87,7 @@ class Grid:
 
         for col in full_cols:
             for i in range(BOARD_SIZE):
-                self.tiles[col][i].update(pygame.Color(0))
+                self.tiles[i][col].update(pygame.Color(0))
 
         lines = len(full_rows) + len(full_cols)
         return 5 * lines * (lines + 1)
-
-    def has_lost(self, pieces: list[Piece]) -> bool:
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
-                if not self.tiles[row][col].empty:
-                    continue
-
-                for piece in pieces:
-                    if self._check_valid(row, col, piece):
-                        return False
-
-        return True
