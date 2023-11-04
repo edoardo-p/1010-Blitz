@@ -28,16 +28,16 @@ def mask_pieces(pieces: list[Piece], mask: list[bool]) -> list[Piece]:
 def generate_pieces() -> list[Piece]:
     pieces = []
     for _ in range(3):
-        piece = random.choice(piece_vectors[2:3])
+        piece = random.choice(piece_vectors)
         pieces.append(Piece(piece["pos"], pygame.Color(piece["color"])))
 
     return pieces
 
 
 def convert(x: int, y: int) -> tuple[int, int]:
-    new_x = (x - GRID_X) // TILE_SIZE
-    new_y = (y - GRID_Y) // TILE_SIZE
-    return new_x, new_y
+    col = (x - GRID_X) // TILE_SIZE
+    row = (y - GRID_Y) // TILE_SIZE
+    return row, col
 
 
 def main():
@@ -69,8 +69,8 @@ def main():
                         is_holding = True
 
             elif event.type == pygame.MOUSEBUTTONDOWN and is_holding:
-                x, y = convert(*pygame.mouse.get_pos())
-                score_delta = grid.update(y, x, piece)
+                row, col = convert(*pygame.mouse.get_pos())
+                score_delta = grid.update(row, col, piece)
                 if score_delta:
                     score += score_delta
 
