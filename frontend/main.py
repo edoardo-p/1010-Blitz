@@ -21,10 +21,14 @@ def draw_piece_menu(
         piece.show(0.5, screen)
 
 
-def generatePieces() -> list[Piece]:
+def mask_pieces(pieces: list[Piece], mask: list[bool]) -> list[Piece]:
+    return [piece for piece, available in zip(pieces, mask) if available]
+
+
+def generate_pieces() -> list[Piece]:
     pieces = []
     for _ in range(3):
-        piece = random.choice(piece_vectors)
+        piece = random.choice(piece_vectors[2:3])
         pieces.append(Piece(piece["pos"], pygame.Color(piece["color"])))
 
     return pieces
@@ -42,7 +46,7 @@ def main():
 
     grid = Grid(GRID_X, GRID_Y)
     is_holding = False
-    pieces = generatePieces()
+    pieces = generate_pieces()
     available_slots = [True, True, True]
     score = 0
 
@@ -71,13 +75,13 @@ def main():
                     score += score_delta
 
                     if not any(available_slots):
-                        pieces = generatePieces()
+                        pieces = generate_pieces()
                         available_slots = [True, True, True]
 
-                    if grid.has_lost(pieces):
-                        draw_piece_menu(pieces, available_slots, screen)
-                        grid.update(x, y, piece)
-                        grid.show(f"Game over! {score}", screen)
+                    if grid.has_lost(mask_pieces(pieces, available_slots)):
+                        pygame.quit()
+                        print(f"Final score: {score}")
+                        return
 
                     is_holding = False
 
