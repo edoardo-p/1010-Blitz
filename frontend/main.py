@@ -2,7 +2,6 @@ import json
 import random
 
 import pygame
-from board import Board
 from constants import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH
 from grid import Grid
 from piece import Piece
@@ -41,7 +40,6 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    board = Board()
     grid = Grid(GRID_X, GRID_Y)
     is_holding = False
     pieces = generatePieces()
@@ -50,8 +48,7 @@ def main():
 
     while True:
         screen.fill(0)
-        board.show(score, screen)
-        grid.show(screen)
+        grid.show(str(score), screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -78,10 +75,9 @@ def main():
                         available_slots = [True, True, True]
 
                     if grid.has_lost(pieces):
-                        print("You lost!")
                         draw_piece_menu(pieces, available_slots, screen)
                         grid.update(x, y, piece)
-                        grid.show(screen)
+                        grid.show(f"Game over! {score}", screen)
 
                     is_holding = False
 

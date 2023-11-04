@@ -1,5 +1,5 @@
 import pygame
-from constants import BOARD_SIZE, RADIUS, SPACING, TILE_SIZE
+from constants import BOARD_SIZE, GRID_X, GRID_Y, RADIUS, SPACING, TILE_SIZE
 from piece import Piece
 from tile import Tile
 
@@ -10,21 +10,25 @@ class Grid:
         self.y = y
         self.tiles = [[Tile() for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
 
-    def show(self, screen: pygame.surface.Surface):
+    def show(self, header: str, screen: pygame.surface.Surface):
+        font = pygame.font.Font(None, 50)
+        text_surface = font.render(header, True, pygame.Color(0, 100, 200))
+        screen.blit(text_surface, (20, 20))
+
         for y, row in enumerate(self.tiles):
             for x, tile in enumerate(row):
-                if not tile.empty:
-                    pygame.draw.rect(
-                        screen,
-                        tile.color,
-                        pygame.Rect(
-                            self.x + x * (TILE_SIZE + SPACING),
-                            self.y + y * (TILE_SIZE + SPACING),
-                            TILE_SIZE,
-                            TILE_SIZE,
-                        ),
-                        border_radius=RADIUS,
-                    )
+                color = pygame.Color(40, 40, 40) if tile.empty else tile.color
+                pygame.draw.rect(
+                    screen,
+                    color,
+                    pygame.Rect(
+                        GRID_X + x * (TILE_SIZE + SPACING),
+                        GRID_Y + y * (TILE_SIZE + SPACING),
+                        TILE_SIZE,
+                        TILE_SIZE,
+                    ),
+                    border_radius=RADIUS,
+                )
 
     def update(self, row: int, col: int, piece: Piece) -> int:
         if self._check_valid(row, col, piece):
