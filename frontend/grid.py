@@ -17,10 +17,9 @@ class Grid:
 
         for y, row in enumerate(self.tiles):
             for x, tile in enumerate(row):
-                color = pygame.Color(40, 40, 40) if tile.empty else tile.color
                 pygame.draw.rect(
                     screen,
-                    color,
+                    tile.color,
                     pygame.Rect(
                         GRID_X + x * (TILE_SIZE + SPACING),
                         GRID_Y + y * (TILE_SIZE + SPACING),
@@ -87,11 +86,11 @@ class Grid:
     def _clear_lines(self, full_rows: list[int], full_cols: list[int]) -> int:
         for row in full_rows:
             for i in range(BOARD_SIZE):
-                self.tiles[row][i].update(pygame.Color(0))
+                self.tiles[row][i].update(pygame.Color(40, 40, 40))
 
         for col in full_cols:
             for i in range(BOARD_SIZE):
-                self.tiles[i][col].update(pygame.Color(0))
+                self.tiles[i][col].update(pygame.Color(40, 40, 40))
 
         lines = len(full_rows) + len(full_cols)
         return 5 * lines * (lines + 1)

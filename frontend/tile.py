@@ -1,12 +1,13 @@
-from pygame import Color
 from dataclasses import dataclass, field
+
+from pygame import Color
 
 
 @dataclass
 class Tile:
-    color: Color = field(default_factory=lambda: Color(0))
+    color: Color = field(default_factory=lambda: Color(40, 40, 40))
     empty: bool = True
 
     def update(self, color: Color):
         self.color = color
-        self.empty = color == Color(0)
+        self.empty = color == Color(40, 40, 40)
