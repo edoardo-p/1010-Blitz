@@ -54,8 +54,8 @@ class Grid:
             curr_row = row + tile_row
             curr_col = col + tile_col
             if not (
-                0 <= curr_row < len(self.tiles)
-                and 0 <= curr_col < len(self.tiles)
+                0 <= curr_row < BOARD_SIZE
+                and 0 <= curr_col < BOARD_SIZE
                 and self.tiles[curr_row][curr_col].empty
             ):
                 return False
@@ -65,21 +65,13 @@ class Grid:
     def _check_lines(self) -> int:
         full_rows = []
         full_cols = []
-        for row in range(len(self.tiles)):
-            for col in range(len(self.tiles)):
-                if self.tiles[row][col].empty:
-                    break
+        for row in range(BOARD_SIZE):
+            if not any(tile.empty for tile in self.tiles[row]):
+                full_rows.append(row)
 
-                if col + 1 == BOARD_SIZE:
-                    full_rows.append(row)
-
-        for col in range(len(self.tiles)):
-            for row in range(len(self.tiles)):
-                if self.tiles[row][col].empty:
-                    break
-
-                if row + 1 == BOARD_SIZE:
-                    full_cols.append(col)
+        for col in range(BOARD_SIZE):
+            if not any(self.tiles[row][col].empty for row in range(BOARD_SIZE)):
+                full_cols.append(col)
 
         return self._clear_lines(full_rows, full_cols)
 
