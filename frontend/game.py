@@ -19,7 +19,7 @@ class Game:
             y, x = divmod(idx, BOARD_SIZE)
             pygame.draw.rect(
                 screen,
-                tile.color,
+                pygame.Color(*tile.color),
                 pygame.Rect(
                     GRID_X + x * (TILE_SIZE + SPACING),
                     GRID_Y + y * (TILE_SIZE + SPACING),

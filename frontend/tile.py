@@ -1,17 +1,15 @@
-from dataclasses import dataclass, field
-
-from pygame import Color
+from dataclasses import dataclass
 
 
 @dataclass
 class Tile:
-    color: Color = field(default_factory=lambda: Color(40, 40, 40))
+    color: tuple[int, int, int] = (40, 40, 40)
     empty: bool = True
 
-    def update(self, color: Color):
+    def update(self, color: tuple[int, int, int]):
         self.color = color
         self.empty = False
 
     def clear(self):
-        self.update(Color(40, 40, 40))
+        self.update((40, 40, 40))
         self.empty = True

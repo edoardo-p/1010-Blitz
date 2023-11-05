@@ -44,14 +44,14 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    grid = Game()
+    game = Game()
     is_holding = False
     pieces = generate_pieces()
     available_slots = [True, True, True]
 
     while True:
         screen.fill(0)
-        grid.show(screen)
+        game.show(screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -69,14 +69,14 @@ def main():
 
             elif event.type == pygame.MOUSEBUTTONDOWN and is_holding:
                 row, col = convert(*pygame.mouse.get_pos())
-                if grid.update(row, col, piece):
+                if game.update(row, col, piece):
                     if not any(available_slots):
                         pieces = generate_pieces()
                         available_slots = [True, True, True]
 
-                    if grid.has_lost(mask_pieces(pieces, available_slots)):
+                    if game.has_lost(mask_pieces(pieces, available_slots)):
                         pygame.quit()
-                        print(f"Final score: {grid.score}")
+                        print(f"Final score: {game.score}")
                         return
 
                     is_holding = False

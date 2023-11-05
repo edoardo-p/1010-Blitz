@@ -3,7 +3,7 @@ from constants import RADIUS, SPACING, TILE_SIZE
 
 
 class Piece:
-    def __init__(self, tiles: list[tuple[int, int]], color: pygame.Color):
+    def __init__(self, tiles: list[tuple[int, int]], color: tuple[int, int, int]):
         self.tiles = tiles
         self.color = color
         self.x = 0
@@ -17,7 +17,7 @@ class Piece:
         for tile in self.tiles:
             pygame.draw.rect(
                 screen,
-                self.color,
+                pygame.Color(*self.color),
                 pygame.Rect(
                     tile[0] * scale * (TILE_SIZE + SPACING) + self.x,
                     tile[1] * scale * (TILE_SIZE + SPACING) + self.y,
