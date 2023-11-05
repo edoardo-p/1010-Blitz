@@ -44,7 +44,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    grid = Grid(GRID_X, GRID_Y)
+    grid = Grid()
     is_holding = False
     pieces = generate_pieces()
     available_slots = [True, True, True]

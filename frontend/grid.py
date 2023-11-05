@@ -5,84 +5,82 @@ from tile import Tile
 
 
 class Grid:
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
-        self.tiles = [[Tile() for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+    def __init__(self):
+        self._tiles = [Tile() for _ in range(BOARD_SIZE * BOARD_SIZE)]
 
-    def show(self, header: str, screen: pygame.surface.Surface):
+    def show(self, header: str, screen: pygame.surface.Surface) -> None:
         font = pygame.font.Font(None, 50)
         text_surface = font.render(header, True, pygame.Color(0, 100, 200))
         screen.blit(text_surface, (20, 20))
 
-        for y, row in enumerate(self.tiles):
-            for x, tile in enumerate(row):
-                pygame.draw.rect(
-                    screen,
-                    tile.color,
-                    pygame.Rect(
-                        GRID_X + x * (TILE_SIZE + SPACING),
-                        GRID_Y + y * (TILE_SIZE + SPACING),
-                        TILE_SIZE,
-                        TILE_SIZE,
-                    ),
-                    border_radius=RADIUS,
-                )
+        for idx, tile in enumerate(self._tiles):
+            y, x = divmod(idx, BOARD_SIZE)
+            pygame.draw.rect(
+                screen,
+                tile.color,
+                pygame.Rect(
+                    GRID_X + x * (TILE_SIZE + SPACING),
+                    GRID_Y + y * (TILE_SIZE + SPACING),
+                    TILE_SIZE,
+                    TILE_SIZE,
+                ),
+                border_radius=RADIUS,
+            )
 
     def update(self, row: int, col: int, piece: Piece) -> int:
-        if self._check_valid(row, col, piece):
+        if self._check_valid(row * BOARD_SIZE + col, piece):
             for tile_col, tile_row in piece.tiles:
-                self.tiles[row + tile_row][col + tile_col].update(piece.color)
-            return self._check_lines() + len(piece.tiles)
+                idx = (row + tile_row) * BOARD_SIZE + col + tile_col
+                self._tiles[idx].update(piece.color)
+            return self._clear_lines() + len(piece.tiles)
 
         return 0
 
     def has_lost(self, pieces: list[Piece]) -> bool:
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
-                if not self.tiles[row][col].empty:
-                    continue
+        for idx, tile in enumerate(self._tiles):
+            if not tile.empty:
+                continue
 
-                for piece in pieces:
-                    if self._check_valid(row, col, piece):
-                        return False
+            for piece in pieces:
+                if self._check_valid(idx, piece):
+                    return False
 
         return True
 
-    def _check_valid(self, row: int, col: int, piece: Piece) -> bool:
+    def _check_valid(self, idx: int, piece: Piece) -> bool:
         for tile_col, tile_row in piece.tiles:
-            curr_row = row + tile_row
-            curr_col = col + tile_col
+            curr_idx = idx + tile_row * BOARD_SIZE + tile_col
             if not (
-                0 <= curr_row < BOARD_SIZE
-                and 0 <= curr_col < BOARD_SIZE
-                and self.tiles[curr_row][curr_col].empty
+                0 <= curr_idx < BOARD_SIZE * BOARD_SIZE
+                # TODO implement check to avoid wraparound
+                # and idx // BOARD_SIZE == curr_idx // BOARD_SIZE
+                and self._tiles[curr_idx].empty
             ):
                 return False
 
         return True
 
-    def _check_lines(self) -> int:
-        full_rows = []
-        full_cols = []
-        for row in range(BOARD_SIZE):
-            if not any(tile.empty for tile in self.tiles[row]):
-                full_rows.append(row)
+    def _clear_lines(self) -> int:
+        lines = 0
 
-        for col in range(BOARD_SIZE):
-            if not any(self.tiles[row][col].empty for row in range(BOARD_SIZE)):
-                full_cols.append(col)
+        for row_num in range(BOARD_SIZE):
+            row = self._get_row(row_num)
+            if not any(tile.empty for tile in row):
+                lines += 1
+                for tile in row:
+                    tile.update(pygame.Color(40, 40, 40))
 
-        return self._clear_lines(full_rows, full_cols)
+        for col_num in range(BOARD_SIZE):
+            col = self._get_col(col_num)
+            if not any(tile.empty for tile in self._get_col(col_num)):
+                lines += 1
+                for tile in col:
+                    tile.update(pygame.Color(40, 40, 40))
 
-    def _clear_lines(self, full_rows: list[int], full_cols: list[int]) -> int:
-        for row in full_rows:
-            for i in range(BOARD_SIZE):
-                self.tiles[row][i].update(pygame.Color(40, 40, 40))
-
-        for col in full_cols:
-            for i in range(BOARD_SIZE):
-                self.tiles[i][col].update(pygame.Color(40, 40, 40))
-
-        lines = len(full_rows) + len(full_cols)
         return 5 * lines * (lines + 1)
+
+    def _get_row(self, row: int) -> list[Tile]:
+        return self._tiles[row * BOARD_SIZE : (row + 1) * BOARD_SIZE]
+
+    def _get_col(self, col: int) -> list[Tile]:
+        return self._tiles[col::BOARD_SIZE]
