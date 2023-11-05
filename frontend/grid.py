@@ -6,11 +6,13 @@ from tile import Tile
 
 class Grid:
     def __init__(self):
+        self.score = 0
         self._tiles = [Tile() for _ in range(BOARD_SIZE * BOARD_SIZE)]
 
-    def show(self, header: str, screen: pygame.surface.Surface) -> None:
+    def show(self, screen: pygame.surface.Surface, header: str | None = None) -> None:
         font = pygame.font.Font(None, 50)
-        text_surface = font.render(header, True, pygame.Color(0, 100, 200))
+        text = str(self.score) if header == None else header
+        text_surface = font.render(text, True, pygame.Color(0, 100, 200))
         screen.blit(text_surface, (20, 20))
 
         for idx, tile in enumerate(self._tiles):
@@ -27,14 +29,16 @@ class Grid:
                 border_radius=RADIUS,
             )
 
-    def update(self, row: int, col: int, piece: Piece) -> int:
+    def update(self, row: int, col: int, piece: Piece) -> bool:
         if self._check_valid(row * BOARD_SIZE + col, piece):
             for tile_col, tile_row in piece.tiles:
                 idx = (row + tile_row) * BOARD_SIZE + col + tile_col
                 self._tiles[idx].update(piece.color)
-            return self._clear_lines() + len(piece.tiles)
+            self._clear_lines()
+            self.score += len(piece.tiles)
+            return True
 
-        return 0
+        return False
 
     def has_lost(self, pieces: list[Piece]) -> bool:
         for idx, tile in enumerate(self._tiles):
@@ -60,7 +64,7 @@ class Grid:
 
         return True
 
-    def _clear_lines(self) -> int:
+    def _clear_lines(self) -> None:
         lines = 0
 
         for row_num in range(BOARD_SIZE):
@@ -77,7 +81,7 @@ class Grid:
                 for tile in col:
                     tile.update(pygame.Color(40, 40, 40))
 
-        return 5 * lines * (lines + 1)
+        self.score += 5 * lines * (lines + 1)
 
     def _get_row(self, row: int) -> list[Tile]:
         return self._tiles[row * BOARD_SIZE : (row + 1) * BOARD_SIZE]
