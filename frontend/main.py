@@ -12,16 +12,6 @@ with open(r"frontend\vectors.json", "r") as f:
 del f
 
 
-def draw_piece_menu(
-    pieces: list[Piece], draw_mask: list[bool], screen: pygame.surface.Surface
-):
-    for i, (piece, to_draw) in enumerate(zip(pieces, draw_mask)):
-        if not to_draw:
-            continue
-        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
-        gui.show_piece(screen, piece, 0.5)
-
-
 def mask_pieces(pieces: list[Piece], mask: list[bool]) -> list[Piece]:
     return [piece for piece, available in zip(pieces, mask) if available]
 
@@ -52,7 +42,7 @@ def main():
 
     while True:
         screen.fill(0)
-        gui.show_game(screen, game)
+        gui.draw_game(screen, game)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,9 +74,9 @@ def main():
 
         if is_holding:
             piece.update(*pygame.mouse.get_pos())
-            gui.show_piece(screen, piece)
+            gui.draw_piece(screen, piece)
 
-        draw_piece_menu(pieces, available_slots, screen)
+        gui.draw_piece_menu(screen, pieces, available_slots)
         pygame.display.flip()
 
 

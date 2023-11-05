@@ -1,10 +1,19 @@
 import pygame
-from constants import BOARD_SIZE, GRID_X, GRID_Y, RADIUS, SPACING, TILE_SIZE
+from constants import (
+    BOARD_SIZE,
+    GRID_HEIGHT,
+    GRID_X,
+    GRID_Y,
+    RADIUS,
+    SPACING,
+    TILE_SIZE,
+    WIN_WIDTH,
+)
 from game import Game
 from piece import Piece
 
 
-def show_game(
+def draw_game(
     screen: pygame.surface.Surface, game: Game, header: str | None = None
 ) -> None:
     font = pygame.font.Font(None, 50)
@@ -27,7 +36,7 @@ def show_game(
         )
 
 
-def show_piece(
+def draw_piece(
     screen: pygame.surface.Surface, piece: Piece, scale: float = 1.0
 ) -> None:
     for tile in piece.tiles:
@@ -42,3 +51,13 @@ def show_piece(
             ),
             border_radius=RADIUS,
         )
+
+
+def draw_piece_menu(
+    screen: pygame.surface.Surface, pieces: list[Piece], draw_mask: list[bool]
+):
+    for i, (piece, to_draw) in enumerate(zip(pieces, draw_mask)):
+        if not to_draw:
+            continue
+        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
+        draw_piece(screen, piece, 0.5)
