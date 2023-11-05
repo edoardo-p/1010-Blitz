@@ -1,6 +1,7 @@
 import json
 import random
 
+import gui
 import pygame
 from constants import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH
 from game import Game
@@ -18,7 +19,7 @@ def draw_piece_menu(
         if not to_draw:
             continue
         piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
-        piece.show(0.5, screen)
+        gui.show_piece(screen, piece, 0.5)
 
 
 def mask_pieces(pieces: list[Piece], mask: list[bool]) -> list[Piece]:
@@ -29,7 +30,7 @@ def generate_pieces() -> list[Piece]:
     pieces = []
     for _ in range(3):
         piece = random.choice(piece_vectors)
-        pieces.append(Piece(piece["pos"], pygame.Color(piece["color"])))
+        pieces.append(Piece(piece["pos"], piece["color"]))
 
     return pieces
 
@@ -51,7 +52,7 @@ def main():
 
     while True:
         screen.fill(0)
-        game.show(screen)
+        gui.show_game(screen, game)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -83,7 +84,7 @@ def main():
 
         if is_holding:
             piece.update(*pygame.mouse.get_pos())
-            piece.show(1, screen)
+            gui.show_piece(screen, piece)
 
         draw_piece_menu(pieces, available_slots, screen)
         pygame.display.flip()
