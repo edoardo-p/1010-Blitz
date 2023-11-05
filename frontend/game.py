@@ -72,14 +72,14 @@ class Game:
             if not any(tile.empty for tile in row):
                 lines += 1
                 for tile in row:
-                    tile.update(pygame.Color(40, 40, 40))
+                    tile.clear()
 
         for col_num in range(BOARD_SIZE):
             col = self._get_col(col_num)
             if not any(tile.empty for tile in self._get_col(col_num)):
                 lines += 1
                 for tile in col:
-                    tile.update(pygame.Color(40, 40, 40))
+                    tile.clear()
 
         self.score += 5 * lines * (lines + 1)
 

@@ -10,4 +10,8 @@ class Tile:
 
     def update(self, color: Color):
         self.color = color
-        self.empty = color == Color(40, 40, 40)
+        self.empty = False
+
+    def clear(self):
+        self.update(Color(40, 40, 40))
+        self.empty = True
