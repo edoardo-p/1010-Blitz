@@ -4,7 +4,7 @@ from piece import Piece
 from tile import Tile
 
 
-class Grid:
+class Game:
     def __init__(self):
         self.score = 0
         self._tiles = [Tile() for _ in range(BOARD_SIZE * BOARD_SIZE)]

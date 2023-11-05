@@ -3,7 +3,7 @@ import random
 
 import pygame
 from constants import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH
-from grid import Grid
+from game import Game
 from piece import Piece
 
 with open(r"frontend\vectors.json", "r") as f:
@@ -44,7 +44,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    grid = Grid()
+    grid = Game()
     is_holding = False
     pieces = generate_pieces()
     available_slots = [True, True, True]
