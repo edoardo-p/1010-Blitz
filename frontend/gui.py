@@ -21,14 +21,13 @@ def draw_game(
     text_surface = font.render(text, True, pygame.Color(0, 100, 200))
     screen.blit(text_surface, (20, 20))
 
-    for idx, tile in enumerate(game.tiles):
-        y, x = divmod(idx, BOARD_SIZE)
+    for tile, row, col in game.get_tiles_and_coords():
         pygame.draw.rect(
             screen,
             pygame.Color(*tile.color),
             pygame.Rect(
-                GRID_X + x * (TILE_SIZE + SPACING),
-                GRID_Y + y * (TILE_SIZE + SPACING),
+                GRID_X + col * (TILE_SIZE + SPACING),
+                GRID_Y + row * (TILE_SIZE + SPACING),
                 TILE_SIZE,
                 TILE_SIZE,
             ),
@@ -39,7 +38,7 @@ def draw_game(
 def draw_piece(
     screen: pygame.surface.Surface, piece: Piece, scale: float = 1.0
 ) -> None:
-    for tile in piece.tiles:
+    for tile in piece.squares_pos:
         pygame.draw.rect(
             screen,
             pygame.Color(*piece.color),

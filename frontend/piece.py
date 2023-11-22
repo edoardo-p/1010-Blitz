@@ -1,6 +1,6 @@
 class Piece:
     def __init__(self, squares_pos: list[tuple[int, int]], color: tuple[int, int, int]):
-        self.tiles = squares_pos
+        self.squares_pos = squares_pos
         self.color = color
         self.x = 0
         self.y = 0
