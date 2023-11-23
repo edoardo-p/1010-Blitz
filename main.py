@@ -47,7 +47,7 @@ def main():
             piece.update(*pygame.mouse.get_pos())
             gui.draw_piece(screen, piece)
 
-        gui.draw_piece_menu(screen, game.pieces)
+        # gui.draw_piece_menu(screen, game.pieces)
         pygame.display.flip()
 
 

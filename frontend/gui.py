@@ -34,6 +34,10 @@ def draw_game(
             border_radius=RADIUS,
         )
 
+    for i, piece in enumerate(game.pieces):
+        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
+        draw_piece(screen, piece, 0.5)
+
 
 def draw_piece(
     screen: pygame.surface.Surface, piece: Piece, scale: float = 1.0
@@ -50,9 +54,3 @@ def draw_piece(
             ),
             border_radius=RADIUS,
         )
-
-
-def draw_piece_menu(screen: pygame.surface.Surface, pieces: list[Piece]):
-    for i, piece in enumerate(pieces):
-        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
-        draw_piece(screen, piece, 0.5)
