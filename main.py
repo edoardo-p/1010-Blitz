@@ -4,7 +4,7 @@ import random
 import pygame
 
 from frontend import gui
-from frontend.constants import (
+from frontend import (
     BOARD_SIZE,
     GRID_HEIGHT,
     GRID_X,
