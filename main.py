@@ -3,16 +3,8 @@ import random
 
 import pygame
 
-from frontend import (
-    GRID_HEIGHT,
-    GRID_X,
-    GRID_Y,
-    TILE_SIZE,
-    WIN_HEIGHT,
-    WIN_WIDTH,
-    gui,
-)
-from frontend.game import Game
+from backend.game import Game
+from frontend import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH, gui
 from frontend.piece import Piece
 
 with open(r"frontend\vectors.json", "r") as f:

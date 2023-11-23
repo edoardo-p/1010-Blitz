@@ -9,7 +9,7 @@ from .parameters import (
     WIN_WIDTH,
 )
 
-from .game import Game
+from backend.game import Game
 from .piece import Piece
 
 

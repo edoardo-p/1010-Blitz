@@ -1,5 +1,5 @@
-from .piece import Piece
-from .tile import Tile
+from frontend.piece import Piece
+from frontend.tile import Tile
 
 
 class Game:
