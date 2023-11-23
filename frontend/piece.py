@@ -1,9 +1,13 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class Piece:
-    def __init__(self, squares_pos: list[tuple[int, int]], color: tuple[int, int, int]):
-        self.squares_pos = squares_pos
-        self.color = color
-        self.x = 0
-        self.y = 0
+    squares_pos: list[tuple[int, int]]
+    color: tuple[int, int, int]
+
+    def __post_init__(self):
+        self.update(0, 0)
 
     def update(self, x: int, y: int):
         self.x = x
