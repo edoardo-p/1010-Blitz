@@ -1,6 +1,5 @@
 import pygame
 from constants import (
-    BOARD_SIZE,
     GRID_HEIGHT,
     GRID_X,
     GRID_Y,

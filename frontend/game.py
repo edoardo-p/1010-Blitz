@@ -1,12 +1,12 @@
-from constants import BOARD_SIZE
 from piece import Piece
 from tile import Tile
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, board_size: int):
         self.score = 0
-        self.tiles = [[Tile() for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+        self.board_size = board_size
+        self.tiles = [[Tile() for _ in range(board_size)] for _ in range(board_size)]
 
     def update(self, row: int, col: int, piece: Piece) -> bool:
         if self._check_valid(row, col, piece):
@@ -19,15 +19,16 @@ class Game:
         return False
 
     def has_lost(self, pieces: list[Piece]) -> bool:
+        return any(self.get_moves(pieces))
+
+    def get_moves(self, pieces: list[Piece]):
         for tile, row, col in self.get_tiles_and_coords():
             if not tile.empty:
                 continue
 
             for piece in pieces:
                 if self._check_valid(row, col, piece):
-                    return False
-
-        return True
+                    yield piece, row, col
 
     def get_tiles_and_coords(self):
         for i, row in enumerate(self.tiles):
@@ -37,8 +38,8 @@ class Game:
     def _check_valid(self, row: int, col: int, piece: Piece) -> bool:
         for tile_col, tile_row in piece.squares_pos:
             if not (
-                0 <= row + tile_row < BOARD_SIZE
-                and 0 <= col + tile_col < BOARD_SIZE
+                0 <= row + tile_row < self.board_size
+                and 0 <= col + tile_col < self.board_size
                 and self.tiles[row + tile_row][col + tile_col].empty
             ):
                 return False
@@ -48,14 +49,14 @@ class Game:
     def _clear_lines(self) -> None:
         lines = 0
 
-        for row_num in range(BOARD_SIZE):
+        for row_num in range(self.board_size):
             row = self._get_row(row_num)
             if not any(tile.empty for tile in row):
                 lines += 1
                 for tile in row:
                     tile.clear()
 
-        for col_num in range(BOARD_SIZE):
+        for col_num in range(self.board_size):
             col = self._get_col(col_num)
             if not any(tile.empty for tile in self._get_col(col_num)):
                 lines += 1
