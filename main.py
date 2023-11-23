@@ -3,15 +3,14 @@ import random
 
 import pygame
 
-from frontend import gui
 from frontend import (
-    BOARD_SIZE,
     GRID_HEIGHT,
     GRID_X,
     GRID_Y,
     TILE_SIZE,
     WIN_HEIGHT,
     WIN_WIDTH,
+    gui,
 )
 from frontend.game import Game
 from frontend.piece import Piece
@@ -44,7 +43,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    game = Game(BOARD_SIZE)
+    game = Game(board_size=10)
     is_holding = False
     pieces = generate_pieces()
     available_slots = [True, True, True]

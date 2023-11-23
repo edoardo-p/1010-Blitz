@@ -1,5 +1,5 @@
 import pygame
-from constants import (
+from parameters import (
     GRID_HEIGHT,
     GRID_X,
     GRID_Y,
@@ -8,6 +8,7 @@ from constants import (
     TILE_SIZE,
     WIN_WIDTH,
 )
+
 from .game import Game
 from .piece import Piece
 
