@@ -1,5 +1,5 @@
 import pygame
-from parameters import (
+from .parameters import (
     GRID_HEIGHT,
     GRID_X,
     GRID_Y,
