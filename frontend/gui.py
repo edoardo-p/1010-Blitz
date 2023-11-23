@@ -10,7 +10,7 @@ from .parameters import (
 )
 
 from backend.game import Game
-from .piece import Piece
+from backend.piece import Piece
 
 
 def draw_game(
@@ -52,11 +52,7 @@ def draw_piece(
         )
 
 
-def draw_piece_menu(
-    screen: pygame.surface.Surface, pieces: list[Piece], draw_mask: list[bool]
-):
-    for i, (piece, to_draw) in enumerate(zip(pieces, draw_mask)):
-        if not to_draw:
-            continue
+def draw_piece_menu(screen: pygame.surface.Surface, pieces: list[Piece]):
+    for i, piece in enumerate(pieces):
         piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
         draw_piece(screen, piece, 0.5)
