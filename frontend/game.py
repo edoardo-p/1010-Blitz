@@ -1,5 +1,5 @@
-from piece import Piece
-from tile import Tile
+from .piece import Piece
+from .tile import Tile
 
 
 class Game:
@@ -19,7 +19,7 @@ class Game:
         return False
 
     def has_lost(self, pieces: list[Piece]) -> bool:
-        return any(self.get_moves(pieces))
+        return not any(self.get_moves(pieces))
 
     def get_moves(self, pieces: list[Piece]):
         for tile, row, col in self.get_tiles_and_coords():

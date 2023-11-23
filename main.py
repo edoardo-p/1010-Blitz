@@ -1,9 +1,10 @@
 import json
 import random
 
-import gui
 import pygame
-from constants import (
+
+from frontend import gui
+from frontend.constants import (
     BOARD_SIZE,
     GRID_HEIGHT,
     GRID_X,
@@ -12,8 +13,8 @@ from constants import (
     WIN_HEIGHT,
     WIN_WIDTH,
 )
-from game import Game
-from piece import Piece
+from frontend.game import Game
+from frontend.piece import Piece
 
 with open(r"frontend\vectors.json", "r") as f:
     piece_vectors = json.load(f)
