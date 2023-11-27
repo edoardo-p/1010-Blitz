@@ -1,6 +1,6 @@
 import pygame
 
-from backend.game import Game
+from backend.custom_env import Game1010
 from frontend import GRID_HEIGHT, GRID_X, GRID_Y, TILE_SIZE, WIN_HEIGHT, WIN_WIDTH, gui
 
 
@@ -14,7 +14,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    game = Game(board_size=10)
+    game = Game1010(board_size=10)
     is_holding = False
 
     while True:
@@ -35,7 +35,7 @@ def main():
 
             elif event.type == pygame.MOUSEBUTTONDOWN and is_holding:
                 row, col = convert(*pygame.mouse.get_pos())
-                if game.update(row, col, piece):
+                if game.step(row, col, piece):
                     if game.has_lost():
                         pygame.quit()
                         print(f"Final score: {game.score}")
@@ -47,7 +47,6 @@ def main():
             piece.update(*pygame.mouse.get_pos())
             gui.draw_piece(screen, piece)
 
-        # gui.draw_piece_menu(screen, game.pieces)
         pygame.display.flip()
 
 

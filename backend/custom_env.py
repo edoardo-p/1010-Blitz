@@ -1,11 +1,19 @@
 import json
 import random
 
+from frontend import gui
+
 from .piece import Piece
 from .tile import Tile
 
+import gymnasium as gym
 
-class Game:
+Outcome = tuple[list[list[int]], int, bool, bool, dict[str, int]]
+
+
+class Game1010(gym.Env):
+    metadata = {"render_modes": ["human"], "render_fps": 4}
+
     def __init__(self, board_size: int):
         self.score = 0
         self.board_size = board_size
@@ -14,18 +22,30 @@ class Game:
             self._piece_vectors = json.load(f)
         del f
 
-        self.pieces = self._generate_pieces()
         self._tiles = [[Tile() for _ in range(board_size)] for _ in range(board_size)]
 
-    def update(self, row: int, col: int, piece: Piece) -> bool:
-        if not self._check_valid(row, col, piece):
-            return False
+    def reset(self, seed=None, options=None) -> tuple[list[list[int]], dict[str, int]]:
+        super().reset(seed=seed)
 
-        for tile_col, tile_row in piece.squares_pos:
-            self._tiles[row + tile_row][col + tile_col].update(piece.color)
-        self._clear_lines()
-        self.score += len(piece.squares_pos)
-        return True
+        self._tiles = [
+            [Tile() for _ in range(self.board_size)] for _ in range(self.board_size)
+        ]
+        self.pieces = self._generate_pieces()
+        observation = self._get_obs()
+        return observation, {"score": self.score}
+
+    def step(self, row: int, col: int, piece: Piece) -> Outcome:
+        if not self._check_valid(row, col, piece):
+            for tile_col, tile_row in piece.squares_pos:
+                self._tiles[row + tile_row][col + tile_col].update(piece.color)
+            self._clear_lines()
+            self.score += len(piece.squares_pos)
+
+        done = self.has_lost()
+        reward = 1 if done else 0  # Binary sparse rewards
+        observation = self._get_obs()
+
+        return observation, reward, done, done, {"score": self.score}
 
     def has_lost(self) -> bool:
         return not any(self.get_moves())
@@ -95,3 +115,6 @@ class Game:
 
     def _get_col(self, col: int) -> list[Tile]:
         return [row[col] for row in self._tiles]
+
+    def _get_obs(self) -> list[list[int]]:
+        pass

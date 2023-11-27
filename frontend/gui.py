@@ -1,4 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame
+
 from .parameters import (
     GRID_HEIGHT,
     GRID_X,
@@ -9,12 +14,13 @@ from .parameters import (
     WIN_WIDTH,
 )
 
-from backend.game import Game
-from backend.piece import Piece
+if TYPE_CHECKING:
+    from backend.custom_env import Game1010
+    from backend.piece import Piece
 
 
 def draw_game(
-    screen: pygame.surface.Surface, game: Game, header: str | None = None
+    screen: pygame.surface.Surface, game: Game1010, header: str | None = None
 ) -> None:
     font = pygame.font.Font(None, 50)
     text = str(game.score) if header == None else header
