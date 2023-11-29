@@ -1,20 +1,17 @@
 import json
 import random
 
-from frontend import gui
+import gymnasium as gym
 
 from .piece import Piece
 from .tile import Tile
 
-import gymnasium as gym
-
-Outcome = tuple[list[list[int]], int, bool, bool, dict[str, int]]
+State = list[list[Tile]]
+Outcome = tuple[State, int, bool]
 
 
 class Game1010(gym.Env):
-    metadata = {"render_modes": ["human"], "render_fps": 4}
-
-    def __init__(self, board_size: int):
+    def __init__(self, board_size: int = 10, max_pieces: int = 3):
         self.score = 0
         self.board_size = board_size
 
@@ -23,41 +20,39 @@ class Game1010(gym.Env):
         del f
 
         self._tiles = [[Tile() for _ in range(board_size)] for _ in range(board_size)]
+        self.max_pieces = max_pieces
 
-    def reset(self, seed=None, options=None) -> tuple[list[list[int]], dict[str, int]]:
+    def reset(self, seed=None, options=None) -> State:
         super().reset(seed=seed)
 
         self._tiles = [
             [Tile() for _ in range(self.board_size)] for _ in range(self.board_size)
         ]
+        self.score = 0
         self.pieces = self._generate_pieces()
-        observation = self._get_obs()
-        return observation, {"score": self.score}
+        return self._tiles
 
-    def step(self, row: int, col: int, piece: Piece) -> Outcome:
+    def step(self, piece_idx: int, row: int, col: int) -> Outcome:
+        if piece_idx >= len(self.pieces):
+            return self._tiles, 0, False
+
+        piece = self.pieces[piece_idx]
         if not self._check_valid(row, col, piece):
-            for tile_col, tile_row in piece.squares_pos:
-                self._tiles[row + tile_row][col + tile_col].update(piece.color)
-            self._clear_lines()
-            self.score += len(piece.squares_pos)
+            return self._tiles, 0, False
 
-        done = self.has_lost()
-        reward = 1 if done else 0  # Binary sparse rewards
-        observation = self._get_obs()
+        for tile_col, tile_row in piece.squares_pos:
+            self._tiles[row + tile_row][col + tile_col].update(piece.color)
+        self._clear_lines()
+        self.score += len(piece.squares_pos)
 
-        return observation, reward, done, done, {"score": self.score}
-
-    def has_lost(self) -> bool:
-        return not any(self.get_moves())
-
-    def get_piece_at_slot(self, slot: int) -> Piece | None:
-        if slot >= len(self.pieces):
-            return None
-
-        piece = self.pieces.pop(slot)
+        self.pieces.remove(piece)
         if not self.pieces:
             self.pieces = self._generate_pieces()
-        return piece
+
+        done = not any(self.get_moves())
+        reward = 0 if done else 1  # Binary sparse rewards
+
+        return self._tiles, reward, done
 
     def get_moves(self):
         for tile, row, col in self.get_tiles_and_coords():
@@ -75,21 +70,18 @@ class Game1010(gym.Env):
 
     def _generate_pieces(self) -> list[Piece]:
         pieces = []
-        for _ in range(3):
+        for _ in range(self.max_pieces):
             piece = random.choice(self._piece_vectors)
             pieces.append(Piece(piece["pos"], piece["color"]))
         return pieces
 
     def _check_valid(self, row: int, col: int, piece: Piece) -> bool:
-        for tile_col, tile_row in piece.squares_pos:
-            if not (
-                0 <= row + tile_row < self.board_size
-                and 0 <= col + tile_col < self.board_size
-                and self._tiles[row + tile_row][col + tile_col].empty
-            ):
-                return False
-
-        return True
+        return all(
+            0 <= row + tile_row < self.board_size
+            and 0 <= col + tile_col < self.board_size
+            and self._tiles[row + tile_row][col + tile_col].empty
+            for tile_col, tile_row in piece.squares_pos
+        )
 
     def _clear_lines(self) -> None:
         lines = 0
@@ -115,6 +107,3 @@ class Game1010(gym.Env):
 
     def _get_col(self, col: int) -> list[Tile]:
         return [row[col] for row in self._tiles]
-
-    def _get_obs(self) -> list[list[int]]:
-        pass
