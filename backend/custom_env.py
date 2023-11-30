@@ -11,15 +11,15 @@ Outcome = tuple[State, int, bool]
 
 
 class Game1010(gym.Env):
-    def __init__(self, board_size: int = 10, max_pieces: int = 3):
+    def __init__(self, board_size: int = 10, max_pieces: int = 3, seed=None):
         self.score = 0
         self.board_size = board_size
+        self.max_pieces = max_pieces
 
         with open(r".\backend\vectors.json", "r") as f:
             self._piece_vectors = json.load(f)
 
-        self._tiles = [[Tile() for _ in range(board_size)] for _ in range(board_size)]
-        self.max_pieces = max_pieces
+        random.seed(seed)
 
     def reset(self, seed=None) -> State:
         super().reset(seed=seed)
