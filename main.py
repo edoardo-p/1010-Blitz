@@ -75,10 +75,10 @@ def main():
 
         if epoch % 200 == 0:
             torch.save(
-                agent.policy_net.state_dict(), rf"{model_dir}\{epoch}\policy_net.pth"
+                agent.policy_net.state_dict(), rf"{model_dir}\policy_net_{epoch}.pth"
             )
             torch.save(
-                agent.target_net.state_dict(), rf"{model_dir}\{epoch}\target_net.pth"
+                agent.target_net.state_dict(), rf"{model_dir}\target_net_{epoch}.pth"
             )
         scores.append(total_reward)
         print(f"Epoch: {epoch}, Score: {env.score}")
