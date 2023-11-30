@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 import numpy as np
 import torch
 import torch.nn as nn
 
-from .custom_env import Game1010
 from .dqn import DQNNet
 from .memory import ReplayMemory, Transition
-from .piece import Piece
+
+if TYPE_CHECKING:
+    from .custom_env import Game1010
+    from .piece import Piece
+    from .tile import Tile
 
 Action = tuple[int, int, int]
 
@@ -44,18 +50,18 @@ class RandomAgent:
         return board
 
 
-class DQNAgent:
+class DQNAgent(Agent):
     def __init__(
         self,
         num_actions,
         state_shape,
         alpha=0.001,
         gamma=0.99,
-        epsilon_start=0.1,
-        epsilon_end=0.1,
-        epsilon_decay=0.1,
-        memory_size=1000000,
-        batch_size=16,
+        epsilon_start=0.9,
+        epsilon_end=0.05,
+        epsilon_decay=2500,
+        memory_size=10000,
+        batch_size=64,
     ):
         self.state_shape = state_shape
         self.actions = num_actions
@@ -66,7 +72,7 @@ class DQNAgent:
         self.batch_size = batch_size
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        layers = [state_shape[0] * state_shape[1], 128, 256, num_actions]
+        layers = [state_shape[0] * state_shape[1], 128, 256]
 
         self.policy_net = DQNNet(layers, num_actions).to(self.device)
         self.target_net = DQNNet(layers, num_actions).to(self.device)
@@ -75,27 +81,18 @@ class DQNAgent:
         self.optimizer = torch.optim.AdamW(self.policy_net.parameters(), lr=alpha)
         self.memory = ReplayMemory(memory_size)
 
-    def choose_action(self, state, steps, random_choice=False) -> Action:
+    def choose_action(self, state: torch.Tensor, steps: int) -> torch.Tensor:
         # Chooses random action
-        if random_choice or np.random.uniform(0, 1) <= self._epsilon(steps):
-            action = np.random.choice(self.actions)
+        if np.random.uniform(0, 1) <= self._epsilon(steps):
+            return torch.randint(self.actions, (1, 1))
 
         # Chooses best q_value action
-        else:
-            vector = self._state_to_tensor(state)
-            action = self.policy_net(vector).max(1).indices.view(1, 1)
-
-        piece_idx, coords = divmod(action, self.state_shape[0] * self.state_shape[1])
-        row, col = divmod(coords, self.state_shape[0])
-        return piece_idx, row, col
+        return self.policy_net(state).argmax().reshape(-1, 1)
 
     def learn(self):
         if len(self.memory) < self.batch_size:
             return
         transitions = self.memory.sample(self.batch_size)
-        # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
-        # detailed explanation). This converts batch-array of Transitions
-        # to Transition of batch-arrays.
         batch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
@@ -141,11 +138,12 @@ class DQNAgent:
         # torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
 
-    def _state_to_tensor(self, state):
-        return torch.tensor(
-            [0 if tile.empty else 1 for row in state for tile in row],
-            dtype=torch.float32,
+    def action_to_tuple(self, action: torch.Tensor) -> Action:
+        piece_idx, coords = divmod(
+            action.item(), self.state_shape[0] * self.state_shape[1]
         )
+        row, col = divmod(coords, self.state_shape[0])
+        return int(piece_idx), int(row), int(col)
 
     def _epsilon(self, steps: int) -> float:
         decay = np.exp(-steps / self.epsilon_decay)
