@@ -17,12 +17,11 @@ class Game1010(gym.Env):
 
         with open(r".\backend\vectors.json", "r") as f:
             self._piece_vectors = json.load(f)
-        del f
 
         self._tiles = [[Tile() for _ in range(board_size)] for _ in range(board_size)]
         self.max_pieces = max_pieces
 
-    def reset(self, seed=None, options=None) -> State:
+    def reset(self, seed=None) -> State:
         super().reset(seed=seed)
 
         self._tiles = [

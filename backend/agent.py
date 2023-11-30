@@ -1,19 +1,32 @@
-import os
+from abc import ABC, abstractmethod
 
 import numpy as np
 import torch
 import torch.nn as nn
 
-from backend.custom_env import Game1010
+from .custom_env import Game1010
+from .dqn import DQNNet
+from .memory import ReplayMemory, Transition
 from .piece import Piece
 
-Action = tuple[int, int, Piece]
+Action = tuple[int, int, int]
 
 
-class _Agent:
-    def __init__(self) -> None:
+class Agent(ABC):
+    def __init__(self, state_shape: tuple[int, ...], num_actions: int):
+        self.state_shape = state_shape
+        self.num_actions = num_actions
+
+    @abstractmethod
+    def choose_action(self, state: np.ndarray) -> Action:
         pass
 
+    @abstractmethod
+    def learn(self, state: np.ndarray, action: Action, reward: float) -> None:
+        pass
+
+
+class RandomAgent:
     def move(self, game: Game1010):
         board = [0 if tile.empty else 1 for tile, *_ in game.get_tiles_and_coords()]
         moves = [
@@ -31,97 +44,101 @@ class _Agent:
         return board
 
 
-class Agent:
+class DQNAgent:
     def __init__(
         self,
         num_actions,
-        state_size,
+        state_shape,
         alpha=0.001,
         gamma=0.99,
-        epsilon=0.1,
+        epsilon_start=0.1,
+        epsilon_end=0.1,
+        epsilon_decay=0.1,
         memory_size=1000000,
-        net_layers=(100, 64, 32, 16),
         batch_size=16,
-        load_from_file=False,
-        verbose=False,
     ):
-        self.state_shape = (state_size, state_size)
+        self.state_shape = state_shape
         self.actions = num_actions
-        self.alpha = alpha
         self.gamma = gamma
-        self.epsilon = epsilon
-        self.net_layers = net_layers
+        self.epsilon_start = epsilon_start
+        self.epsilon_end = epsilon_end
+        self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.memory_size = memory_size
-        self.verbose = verbose
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.memory = []
+        layers = [state_shape[0] * state_shape[1], 128, 256, num_actions]
 
-        self.checkpoint_path = "model_data/cp.ckpt"
-        self.checkpoint_dir = os.path.dirname(self.checkpoint_path)
+        self.policy_net = DQNNet(layers, num_actions).to(self.device)
+        self.target_net = DQNNet(layers, num_actions).to(self.device)
+        self.target_net.load_state_dict(self.policy_net.state_dict())
 
-        self.build_neural_net(load_from_file)
-        self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=self.alpha)
-        self.loss = nn.MSELoss()
+        self.optimizer = torch.optim.AdamW(self.policy_net.parameters(), lr=alpha)
+        self.memory = ReplayMemory(memory_size)
 
-    def build_neural_net(self, load_from_net):
-        self.q_net = nn.Sequential()
-        for num_inputs, num_outputs in zip(self.net_layers[:-1], self.net_layers[1:]):
-            self.q_net.append(nn.Linear(num_inputs, num_outputs))
-            self.q_net.append(nn.ReLU())
-        # self.q_net.append(nn.Flatten())
-        self.q_net.append(nn.Linear(self.net_layers[-1], 10))  # TODO parametrize
-
-        if load_from_net:
-            try:
-                self.q_net.load_state_dict(torch.load(self.checkpoint_path))
-                self.q_net.load_weights(self.checkpoint_path)
-            except ValueError:
-                print(
-                    f"No weight data found at {self.checkpoint_path}, building new agent"
-                )
-        if self.verbose:
-            print(self.q_net)
-        return
-
-    def choose_action(self, state, random_choice=False) -> int:
-        vector = self._state_to_tensor(state)
+    def choose_action(self, state, steps, random_choice=False) -> Action:
         # Chooses random action
-        if random_choice or np.random.uniform(0, 1) <= self.epsilon:
-            return np.random.choice(self.actions)
+        if random_choice or np.random.uniform(0, 1) <= self._epsilon(steps):
+            action = np.random.choice(self.actions)
 
         # Chooses best q_value action
-        q_out = self.q_net(vector)
-        return torch.argmax(q_out).item()
+        else:
+            vector = self._state_to_tensor(state)
+            action = self.policy_net(vector).max(1).indices.view(1, 1)
+
+        piece_idx, coords = divmod(action, self.state_shape[0] * self.state_shape[1])
+        row, col = divmod(coords, self.state_shape[0])
+        return piece_idx, row, col
 
     def learn(self):
-        return
-        try:
-            experience_sample = np.random.choice(self.memory, self.batch_size)
-        except ValueError:
+        if len(self.memory) < self.batch_size:
             return
+        transitions = self.memory.sample(self.batch_size)
+        # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
+        # detailed explanation). This converts batch-array of Transitions
+        # to Transition of batch-arrays.
+        batch = Transition(*zip(*transitions))
 
-        states = np.array([trajectory["state"] for trajectory in experience_sample])
-        next_states = np.array(
-            [trajectory["next_state"] for trajectory in experience_sample]
+        # Compute a mask of non-final states and concatenate the batch elements
+        # (a final state would've been the one after which simulation ended)
+        non_final_mask = torch.tensor(
+            tuple(map(lambda s: s is not None, batch.next_state)),
+            device=self.device,
+            dtype=torch.bool,
         )
-        q_values = self.q_net.predict(
-            next_states.reshape(self.batch_size, *self.state_shape)
+        non_final_next_states = torch.cat(
+            [s for s in batch.next_state if s is not None]
         )
-        target = self.q_net(states.reshape(self.batch_size, *self.state_shape)).numpy()
+        state_batch = torch.cat(batch.state)
+        action_batch = torch.cat(batch.action)
+        reward_batch = torch.cat(batch.reward)
 
-        for i in range(self.batch_size):
-            trajectory = experience_sample[i]
-            action = trajectory["action"]
-            target = trajectory["reward"]
-            if not trajectory["terminal"]:
-                target += self.gamma * np.amax(q_values[i][:])
-            target[i][action] = target
+        # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
+        # columns of actions taken. These are the actions which would've been taken
+        # for each batch state according to policy_net
+        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
-        pred = self.q_net(
-            states.reshape(self.batch_size, *self.state_shape),
-        )
-        self.loss(pred, target).backward()
+        # Compute V(s_{t+1}) for all next states.
+        # Expected values of actions for non_final_next_states are computed based
+        # on the "older" target_net; selecting their best reward with max(1).values
+        # This is merged based on the mask, such that we'll have either the expected
+        # state value or 0 in case the state was final.
+        next_state_values = torch.zeros(self.batch_size, device=self.device)
+        with torch.no_grad():
+            next_state_values[non_final_mask] = (
+                self.target_net(non_final_next_states).max(1).values
+            )
+        # Compute the expected Q values
+        expected_state_action_values = (next_state_values * self.gamma) + reward_batch
+
+        # Compute Huber loss
+        criterion = nn.SmoothL1Loss()
+        loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
+
+        # Optimize the model
+        self.optimizer.zero_grad()
+        loss.backward()
+        # In-place gradient clipping
+        # torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
 
     def _state_to_tensor(self, state):
@@ -129,3 +146,7 @@ class Agent:
             [0 if tile.empty else 1 for row in state for tile in row],
             dtype=torch.float32,
         )
+
+    def _epsilon(self, steps: int) -> float:
+        decay = np.exp(-steps / self.epsilon_decay)
+        return self.epsilon_end + (self.epsilon_start - self.epsilon_end) * decay
