@@ -9,15 +9,19 @@ from backend.custom_env import Game1010
 from backend.tile import Tile
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
 
-EPOCHS = 1000
+EPOCHS = 10
 TAU = 0.005
 
 
-def state_to_tensor(state: list[list[Tile]]) -> torch.Tensor:
-    return torch.tensor(
-        [not tile.empty for row in state for tile in row],
-        dtype=torch.float32,
-    ).unsqueeze(0)
+def state_to_tensor(state: list[list[Tile]], device: torch.device) -> torch.Tensor:
+    return (
+        torch.tensor(
+            [not tile.empty for row in state for tile in row],
+            dtype=torch.float32,
+        )
+        .unsqueeze(0)
+        .to(device)
+    )
 
 
 def main():
@@ -27,14 +31,18 @@ def main():
         pygame.init()
         screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
-    env = Game1010(max_pieces=1)
-    agent = DQNAgent(env.board_size * env.board_size * env.max_pieces, (10, 10))
     model_dir = r"backend\models\linear_test"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    env = Game1010(max_pieces=1)
+    agent = DQNAgent(
+        env.board_size * env.board_size * env.max_pieces,
+        (env.board_size, env.board_size),
+        device,
+    )
     scores = []
 
     for epoch in range(1, EPOCHS + 1):
-        state = state_to_tensor(env.reset())
-        total_reward = 0
+        state = state_to_tensor(env.reset(), device)
 
         for step in count():
             if render:
@@ -45,13 +53,13 @@ def main():
 
             action = agent.choose_action(state, step)
             observation, reward, done = env.step(*agent.action_to_tuple(action))
-            reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0)
+            reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).to(device)
 
             if done:
                 agent.memory.push(state, action, None, reward)
                 break
 
-            next_state = state_to_tensor(observation)
+            next_state = state_to_tensor(observation, device)
             agent.memory.push(state, action, (next_state), reward)
             state = next_state
             agent.learn()
@@ -71,16 +79,14 @@ def main():
                 gui.draw_game(screen, env)
                 pygame.display.flip()
 
-            total_reward += reward
-
-        if epoch % 200 == 0:
+        if epoch % 200 == -1:
             torch.save(
                 agent.policy_net.state_dict(), rf"{model_dir}\policy_net_{epoch}.pth"
             )
             torch.save(
                 agent.target_net.state_dict(), rf"{model_dir}\target_net_{epoch}.pth"
             )
-        scores.append(total_reward)
+        scores.append(env.score)
         print(f"Epoch: {epoch}, Score: {env.score}")
 
     plt.plot(scores)
