@@ -2,13 +2,18 @@ import random
 from collections import deque
 from dataclasses import dataclass
 
+import torch
+
 
 @dataclass
 class Transition:
-    state: list
-    action: int
-    next_state: list
-    reward: float
+    state: torch.Tensor
+    action: torch.Tensor
+    next_state: torch.Tensor
+    reward: torch.Tensor
+
+    def __iter__(self):
+        return iter((self.state, self.action, self.next_state, self.reward))
 
 
 class ReplayMemory:
