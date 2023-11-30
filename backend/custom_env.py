@@ -39,6 +39,7 @@ class Game1010(gym.Env):
         if not self._check_valid(row, col, piece):
             return self._tiles, 0, False
 
+        curr_score = self.score
         for tile_col, tile_row in piece.squares_pos:
             self._tiles[row + tile_row][col + tile_col].update(piece.color)
         self._clear_lines()
@@ -49,7 +50,7 @@ class Game1010(gym.Env):
             self.pieces = self._generate_pieces()
 
         done = not any(self.get_moves())
-        reward = 0 if done else 1  # Binary sparse rewards
+        reward = self.score - curr_score
 
         return self._tiles, reward, done
 
