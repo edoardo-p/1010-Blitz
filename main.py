@@ -9,6 +9,7 @@ from backend.custom_env import Game1010
 from backend.tile import Tile
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
 
+MODEL_DIR = r"backend\models\linear_test"
 EPOCHS = 10
 TAU = 0.005
 
@@ -24,22 +25,14 @@ def state_to_tensor(state: list[list[Tile]], device: torch.device) -> torch.Tens
     )
 
 
-def main():
-    render = True
-
-    if render:
-        pygame.init()
-        screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-
-    model_dir = r"backend\models\linear_test"
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = Game1010(max_pieces=1)
-    agent = DQNAgent(
-        env.board_size * env.board_size * env.max_pieces,
-        (env.board_size, env.board_size),
-        device,
-    )
+def train(
+    env: Game1010,
+    agent: DQNAgent,
+    device: torch.device,
+    screen: pygame.Surface | None = None,
+) -> list[int]:
     scores = []
+    render = screen is not None
 
     for epoch in range(1, EPOCHS + 1):
         state = state_to_tensor(env.reset(), device)
@@ -49,7 +42,7 @@ def main():
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
-                        return
+                        return scores
 
             action = agent.choose_action(state, step)
             observation, reward, done = env.step(*agent.action_to_tuple(action))
@@ -81,14 +74,37 @@ def main():
 
         if epoch % 200 == -1:
             torch.save(
-                agent.policy_net.state_dict(), rf"{model_dir}\policy_net_{epoch}.pth"
+                agent.policy_net.state_dict(), rf"{MODEL_DIR}\policy_net_{epoch}.pth"
             )
             torch.save(
-                agent.target_net.state_dict(), rf"{model_dir}\target_net_{epoch}.pth"
+                agent.target_net.state_dict(), rf"{MODEL_DIR}\target_net_{epoch}.pth"
             )
+
         scores.append(env.score)
         print(f"Epoch: {epoch}, Score: {env.score}")
 
+    if render:
+        pygame.quit()
+
+    return scores
+
+
+def main():
+    screen, render = None, True
+
+    if render:
+        pygame.init()
+        screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    env = Game1010(max_pieces=1)
+    agent = DQNAgent(
+        env.board_size * env.board_size * env.max_pieces,
+        (env.board_size, env.board_size),
+        device,
+    )
+
+    scores = train(env, agent, device, screen)
     plt.plot(scores)
     plt.show()
 
