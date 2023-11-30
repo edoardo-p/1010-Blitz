@@ -1,8 +1,3 @@
-from __future__ import annotations
-
-from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -10,51 +5,15 @@ import torch.nn as nn
 from .dqn import DQNNet
 from .memory import ReplayMemory, Transition
 
-if TYPE_CHECKING:
-    from .custom_env import Game1010
-    from .piece import Piece
-    from .tile import Tile
-
 Action = tuple[int, int, int]
 
 
-class Agent(ABC):
-    def __init__(self, state_shape: tuple[int, ...], num_actions: int):
-        self.state_shape = state_shape
-        self.num_actions = num_actions
-
-    @abstractmethod
-    def choose_action(self, state: np.ndarray) -> Action:
-        pass
-
-    @abstractmethod
-    def learn(self, state: np.ndarray, action: Action, reward: float) -> None:
-        pass
-
-
-class RandomAgent:
-    def move(self, game: Game1010):
-        board = [0 if tile.empty else 1 for tile, *_ in game.get_tiles_and_coords()]
-        moves = [
-            self.convert_move_to_array(row, col, piece, board)
-            for piece, row, col in game.get_moves()
-        ]
-
-    def convert_move_to_array(
-        self, row: int, col: int, piece: Piece, board: list[int]
-    ) -> list[int]:
-        for tile_col, tile_row in piece.squares_pos:
-            idx = (row + tile_row) * 10 + (col + tile_col)
-            board[idx] = 1
-
-        return board
-
-
-class DQNAgent(Agent):
+class DQNAgent:
     def __init__(
         self,
         num_actions,
         state_shape,
+        device,
         alpha=0.001,
         gamma=0.99,
         epsilon_start=0.9,
@@ -63,14 +22,14 @@ class DQNAgent(Agent):
         memory_size=10000,
         batch_size=64,
     ):
-        self.state_shape = state_shape
         self.actions = num_actions
+        self.state_shape = state_shape
+        self.device = device
         self.gamma = gamma
         self.epsilon_start = epsilon_start
         self.epsilon_end = epsilon_end
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         layers = [state_shape[0] * state_shape[1], 128, 256]
 
@@ -81,10 +40,10 @@ class DQNAgent(Agent):
         self.optimizer = torch.optim.AdamW(self.policy_net.parameters(), lr=alpha)
         self.memory = ReplayMemory(memory_size)
 
-    def choose_action(self, state: torch.Tensor, steps: int) -> torch.Tensor:
+    def choose_action(self, state: torch.Tensor, step: int) -> torch.Tensor:
         # Chooses random action
-        if np.random.uniform(0, 1) <= self._epsilon(steps):
-            return torch.randint(self.actions, (1, 1))
+        if np.random.uniform(0, 1) <= self._epsilon(step):
+            return torch.randint(self.actions, (1, 1), device=self.device)
 
         # Chooses best q_value action
         return self.policy_net(state).argmax().reshape(-1, 1)
@@ -140,7 +99,7 @@ class DQNAgent(Agent):
 
     def action_to_tuple(self, action: torch.Tensor) -> Action:
         piece_idx, coords = divmod(
-            action.item(), self.state_shape[0] * self.state_shape[1]
+            action.cpu().item(), self.state_shape[0] * self.state_shape[1]
         )
         row, col = divmod(coords, self.state_shape[0])
         return int(piece_idx), int(row), int(col)
