@@ -5,8 +5,7 @@ import torch
 from matplotlib import pyplot as plt
 
 from backend.agent import DQNAgent
-from backend.custom_env import Game1010
-from backend.tile import Tile
+from backend.custom_env import Game1010, State
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
 
 MODEL_DIR = r"backend\models\linear_test"
@@ -14,14 +13,27 @@ EPOCHS = 10
 TAU = 0.005
 
 
-def state_to_tensor(state: list[list[Tile]], device: torch.device) -> torch.Tensor:
+def squares_to_grid(squares: list[tuple[int, int]]) -> list[list[int]]:
+    grid = [[0] * 5 for _ in range(5)]
+    for square in squares:
+        grid[2 + square[0]][2 + square[1]] = 1
+    return grid
+
+
+def state_to_tensor(
+    state: State, device: torch.device
+) -> tuple[torch.Tensor, torch.Tensor]:
+    grid, piece = state
     return (
         torch.tensor(
-            [not tile.empty for row in state for tile in row],
+            [not tile.empty for row in grid for tile in row],
             dtype=torch.float32,
         )
+        .reshape(-1, 10, 10)
+        .to(device),
+        torch.tensor(squares_to_grid(piece.squares_pos), dtype=torch.float32)
         .unsqueeze(0)
-        .to(device)
+        .to(device),
     )
 
 
@@ -44,7 +56,7 @@ def train(
                         pygame.quit()
                         return scores
 
-            action = agent.choose_action(state, step)
+            action = agent.choose_action(*state, step)
             observation, reward, done = env.step(*agent.action_to_tuple(action))
             reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).to(device)
 
@@ -53,7 +65,7 @@ def train(
                 break
 
             next_state = state_to_tensor(observation, device)
-            agent.memory.push(state, action, (next_state), reward)
+            agent.memory.push(state, action, next_state, reward)
             state = next_state
             agent.learn()
 

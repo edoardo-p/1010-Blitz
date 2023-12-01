@@ -6,7 +6,7 @@ import gymnasium as gym
 from .piece import Piece
 from .tile import Tile
 
-State = list[list[Tile]]
+State = tuple[list[list[Tile]], Piece]
 Outcome = tuple[State, int, bool]
 
 
@@ -29,15 +29,15 @@ class Game1010(gym.Env):
         ]
         self.score = 0
         self.pieces = self._generate_pieces()
-        return self._tiles
+        return self._tiles, self.pieces[0]
 
     def step(self, piece_idx: int, row: int, col: int) -> Outcome:
         if piece_idx >= len(self.pieces):
-            return self._tiles, 0, False
+            return (self._tiles, self.pieces[0]), 0, False
 
         piece = self.pieces[piece_idx]
         if not self._check_valid(row, col, piece):
-            return self._tiles, 0, False
+            return (self._tiles, self.pieces[0]), 0, False
 
         curr_score = self.score
         for tile_col, tile_row in piece.squares_pos:
@@ -52,7 +52,7 @@ class Game1010(gym.Env):
         done = not any(self.get_moves())
         reward = self.score - curr_score
 
-        return self._tiles, reward, done
+        return (self._tiles, self.pieces[0]), reward, done
 
     def get_moves(self):
         for tile, row, col in self.get_tiles_and_coords():

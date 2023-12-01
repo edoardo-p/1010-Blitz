@@ -7,9 +7,9 @@ import torch
 
 @dataclass
 class Transition:
-    state: torch.Tensor
+    state: tuple[torch.Tensor, torch.Tensor]
     action: torch.Tensor
-    next_state: torch.Tensor
+    next_state: tuple[torch.Tensor, torch.Tensor]
     reward: torch.Tensor
 
     def __iter__(self):
