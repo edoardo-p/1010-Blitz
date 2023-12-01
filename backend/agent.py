@@ -31,22 +31,23 @@ class DQNAgent:
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
 
-        layers = [state_shape[0] * state_shape[1], 128, 256]
-
-        self.policy_net = DQNNet(layers, num_actions).to(self.device)
-        self.target_net = DQNNet(layers, num_actions).to(self.device)
+        self.policy_net = DQNNet(num_actions).to(self.device)
+        self.target_net = DQNNet(num_actions).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
 
         self.optimizer = torch.optim.AdamW(self.policy_net.parameters(), lr=alpha)
         self.memory = ReplayMemory(memory_size)
 
-    def choose_action(self, state: torch.Tensor, step: int) -> torch.Tensor:
+    def choose_action(
+        self, state: torch.Tensor, piece: torch.Tensor, step: int
+    ) -> torch.Tensor:
         # Chooses random action
         if np.random.uniform(0, 1) <= self._epsilon(step):
             return torch.randint(self.actions, (1, 1), device=self.device)
 
         # Chooses best q_value action
-        return self.policy_net(state).argmax().reshape(-1, 1)
+        # piece_idx = ... (Piece -> torch.Tensor)
+        return self.policy_net(state, piece).argmax().reshape(-1, 1)
 
     def learn(self):
         if len(self.memory) < self.batch_size:
@@ -57,21 +58,24 @@ class DQNAgent:
         # Compute a mask of non-final states and concatenate the batch elements
         # (a final state would've been the one after which simulation ended)
         non_final_mask = torch.tensor(
-            tuple(map(lambda s: s is not None, batch.next_state)),
+            [s is not None for s in batch.next_state],
             device=self.device,
             dtype=torch.bool,
         )
-        non_final_next_states = torch.cat(
-            [s for s in batch.next_state if s is not None]
-        )
-        state_batch = torch.cat(batch.state)
+        next_state_transpose = zip(*(s for s in batch.next_state if s is not None))
+        non_final_next_states = [
+            torch.cat(transpose) for transpose in next_state_transpose
+        ]
+
+        state_transpose = zip(*batch.state)
+        state_batch = [torch.cat(transpose) for transpose in state_transpose]
         action_batch = torch.cat(batch.action)
         reward_batch = torch.cat(batch.reward)
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken. These are the actions which would've been taken
         # for each batch state according to policy_net
-        state_action_values = self.policy_net(state_batch).gather(1, action_batch)
+        state_action_values = self.policy_net(*state_batch).gather(1, action_batch)
 
         # Compute V(s_{t+1}) for all next states.
         # Expected values of actions for non_final_next_states are computed based
@@ -81,7 +85,7 @@ class DQNAgent:
         next_state_values = torch.zeros(self.batch_size, device=self.device)
         with torch.no_grad():
             next_state_values[non_final_mask] = (
-                self.target_net(non_final_next_states).max(1).values
+                self.target_net(*non_final_next_states).max(1).values
             )
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch

@@ -8,7 +8,7 @@ from backend.agent import DQNAgent
 from backend.custom_env import Game1010, State
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
 
-MODEL_DIR = r"backend\models\linear_test"
+MODEL_DIR = r"backend\models\cnn"
 EPOCHS = 10
 TAU = 0.005
 
@@ -29,10 +29,10 @@ def state_to_tensor(
             [not tile.empty for row in grid for tile in row],
             dtype=torch.float32,
         )
-        .reshape(-1, 10, 10)
+        .reshape(-1, 1, 10, 10)
         .to(device),
         torch.tensor(squares_to_grid(piece.squares_pos), dtype=torch.float32)
-        .unsqueeze(0)
+        .reshape(-1, 1, 5, 5)
         .to(device),
     )
 
@@ -102,7 +102,7 @@ def train(
 
 
 def main():
-    screen, render = None, True
+    screen, render = None, False
 
     if render:
         pygame.init()

@@ -3,14 +3,36 @@ import torch.nn as nn
 
 
 class DQNNet(nn.Module):
-    def __init__(self, net_layers: list[int], num_actions: int):
+    def __init__(self, num_actions: int):
         super().__init__()
 
-        self.q_net = nn.Sequential()
-        for num_inputs, num_outputs in zip(net_layers[:-1], net_layers[1:]):
-            self.q_net.append(nn.Linear(num_inputs, num_outputs))
-            self.q_net.append(nn.ReLU())
-        self.q_net.append(nn.Linear(net_layers[-1], num_actions))
+        self.grid_conv = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+        )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.q_net(x)
+        self.piece_conv = nn.Sequential(
+            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+        )
+
+        self.fc = nn.Sequential(
+            nn.Linear(64 * 2 * 2 + 64, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, num_actions),
+            nn.Sigmoid(),
+        )
+
+    def forward(self, grid: torch.Tensor, piece: torch.Tensor) -> torch.Tensor:
+        grid_vector = self.grid_conv(grid)
+        piece_vector = self.piece_conv(piece)
+        x = torch.cat((grid_vector, piece_vector), dim=-1)
+        return self.fc(x)
