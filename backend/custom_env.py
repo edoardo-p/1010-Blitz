@@ -33,11 +33,11 @@ class Game1010(gym.Env):
 
     def step(self, piece_idx: int, row: int, col: int) -> Outcome:
         if piece_idx >= len(self.pieces):
-            return (self._tiles, self.pieces[0]), 0, False
+            return (self._tiles, self.pieces[0]), -100, False
 
         piece = self.pieces[piece_idx]
         if not self._check_valid(row, col, piece):
-            return (self._tiles, self.pieces[0]), 0, False
+            return (self._tiles, self.pieces[0]), -100, False
 
         curr_score = self.score
         for tile_col, tile_row in piece.squares_pos:
