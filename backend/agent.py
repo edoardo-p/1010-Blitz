@@ -17,10 +17,10 @@ class DQNAgent:
         alpha=0.001,
         gamma=0.99,
         epsilon_start=0.9,
-        epsilon_end=0.05,
-        epsilon_decay=2500,
-        memory_size=10000,
-        batch_size=64,
+        epsilon_end=0.01,
+        epsilon_decay=200,
+        memory_size=25000,
+        batch_size=256,
     ):
         self.actions = num_actions
         self.state_shape = state_shape
@@ -37,6 +37,10 @@ class DQNAgent:
 
         self.optimizer = torch.optim.AdamW(self.policy_net.parameters(), lr=alpha)
         self.memory = ReplayMemory(memory_size)
+
+    def load(self, model_dir: str):
+        self.policy_net.load_state_dict(torch.load(rf"{model_dir}\policy_net.pth"))
+        self.target_net.load_state_dict(torch.load(rf"{model_dir}\target_net.pth"))
 
     def choose_action(
         self, state: torch.Tensor, piece: torch.Tensor, step: int
