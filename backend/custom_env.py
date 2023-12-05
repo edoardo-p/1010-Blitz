@@ -51,7 +51,8 @@ class Game1010(gym.Env):
 
         done = not any(self.get_moves())
         reward = self.score - curr_score
-
+        if done:
+            reward = -100
         return (self._tiles, self.pieces[0]), reward, done
 
     def get_moves(self):
