@@ -14,12 +14,10 @@ class DQNNet(nn.Module):
             nn.Flatten(),
         )
 
-        self.piece_conv = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Flatten(),
+        self.embedding = nn.Sequential(
+            nn.Embedding(19, 4),
+            nn.Linear(4, 64),
+            nn.ReLU(),
         )
 
         self.fc = nn.Sequential(
@@ -31,8 +29,8 @@ class DQNNet(nn.Module):
             nn.Sigmoid(),
         )
 
-    def forward(self, grid: torch.Tensor, piece: torch.Tensor) -> torch.Tensor:
+    def forward(self, grid: torch.Tensor, piece_idx: torch.Tensor) -> torch.Tensor:
         grid_vector = self.grid_conv(grid)
-        piece_vector = self.piece_conv(piece)
+        piece_vector = self.embedding(piece_idx)
         x = torch.cat((grid_vector, piece_vector), dim=-1)
         return self.fc(x)
