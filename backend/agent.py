@@ -14,6 +14,7 @@ class DQNAgent:
         num_actions,
         state_shape,
         device,
+        train=True,
         alpha=0.001,
         gamma=0.99,
         epsilon_start=0.9,
@@ -25,12 +26,14 @@ class DQNAgent:
         self.actions = num_actions
         self.state_shape = state_shape
         self.device = device
+        self.train = train
         self.gamma = gamma
         self.epsilon_start = epsilon_start
         self.epsilon_end = epsilon_end
         self.epsilon_decay = epsilon_decay
         self.batch_size = batch_size
 
+        self.step = 0
         self.policy_net = DQNNet(num_actions).to(self.device)
         self.target_net = DQNNet(num_actions).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
@@ -42,11 +45,9 @@ class DQNAgent:
         self.policy_net.load_state_dict(torch.load(rf"{model_dir}\policy_net.pth"))
         self.target_net.load_state_dict(torch.load(rf"{model_dir}\target_net.pth"))
 
-    def choose_action(
-        self, state: torch.Tensor, piece: torch.Tensor, step: int
-    ) -> torch.Tensor:
+    def choose_action(self, state: torch.Tensor, piece: torch.Tensor) -> torch.Tensor:
         # Chooses random action
-        if np.random.uniform(0, 1) <= self._epsilon(step):
+        if np.random.uniform(0, 1) <= self._epsilon():
             return torch.randint(self.actions, (1, 1), device=self.device)
 
         # Chooses best q_value action
@@ -54,7 +55,7 @@ class DQNAgent:
         return self.policy_net(state, piece).argmax().reshape(-1, 1)
 
     def learn(self):
-        if len(self.memory) < self.batch_size:
+        if not self.train or len(self.memory) < self.batch_size:
             return
         transitions = self.memory.sample(self.batch_size)
         batch = Transition(*zip(*transitions))
@@ -112,6 +113,8 @@ class DQNAgent:
         row, col = divmod(coords, self.state_shape[0])
         return int(piece_idx), int(row), int(col)
 
-    def _epsilon(self, steps: int) -> float:
-        decay = np.exp(-steps / self.epsilon_decay)
+    def _epsilon(self) -> float:
+        if not self.train:
+            return self.epsilon_end
+        decay = np.exp(-self.step / self.epsilon_decay)
         return self.epsilon_end + (self.epsilon_start - self.epsilon_end) * decay
