@@ -12,7 +12,6 @@ Outcome = tuple[State, int, bool]
 
 class Game1010(gym.Env):
     def __init__(self, board_size: int = 10, max_pieces: int = 3, seed=None):
-        self.score = 0
         self.board_size = board_size
         self.max_pieces = max_pieces
 

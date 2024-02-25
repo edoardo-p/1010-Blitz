@@ -67,6 +67,7 @@ def train(
 
     for epoch in range(1, EPOCHS + 1):
         state = state_to_tensor(env.reset(), device)
+        agent.step = epoch
 
         while True:
             if render:
@@ -74,7 +75,7 @@ def train(
                     if event.type == pygame.QUIT:
                         return scores
 
-            action = agent.choose_action(*state, epoch)
+            action = agent.choose_action(*state)
             observation, reward, done = env.step(*agent.action_to_tuple(action))
             reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).to(device)
 
@@ -121,9 +122,10 @@ def test(
     render = screen is not None
     state = state_to_tensor(env.reset(), device)
     agent.load(MODEL_DIR)
+    agent.train = False
 
     while True:
-        action = agent.choose_action(*state, 999999)
+        action = agent.choose_action(*state)
         observation, _, done = env.step(*agent.action_to_tuple(action))
 
         if done:
@@ -143,7 +145,7 @@ def test(
 
 
 def main():
-    render, to_train = False, True
+    render, to_train = True, True
 
     screen = None
     if render:
@@ -156,6 +158,7 @@ def main():
         env.board_size * env.board_size * env.max_pieces,
         (env.board_size, env.board_size),
         device,
+        train=to_train,
     )
 
     if to_train:
