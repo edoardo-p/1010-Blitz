@@ -33,11 +33,11 @@ class Game1010(gym.Env):
 
     def step(self, piece_idx: int, row: int, col: int) -> Outcome:
         if piece_idx >= len(self.pieces):
-            return (self._tiles, self.pieces[0]), -100, False
+            return (self._tiles, self.pieces[0]), -1000, False
 
         piece = self.pieces[piece_idx]
         if not self._check_valid(row, col, piece):
-            return (self._tiles, self.pieces[0]), -100, False
+            return (self._tiles, self.pieces[0]), -1000, False
 
         curr_score = self.score
         for tile_col, tile_row in piece.squares_pos:
@@ -52,7 +52,7 @@ class Game1010(gym.Env):
         done = not any(self.get_moves())
         reward = self.score - curr_score
         if done:
-            reward = -100
+            reward = -5000
         return (self._tiles, self.pieces[0]), reward, done
 
     def get_moves(self) -> Generator[tuple[Piece, int, int], None, None]:
