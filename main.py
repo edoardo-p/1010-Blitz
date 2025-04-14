@@ -55,6 +55,7 @@ def state_to_tensor(
     )
 
 
+# TODO move inside agent class
 def train(
     env: Game1010,
     agent: DQNAgent,
@@ -112,6 +113,7 @@ def train(
     return scores
 
 
+# TODO move inside agent class
 def test(
     env: Game1010,
     agent: DQNAgent,
