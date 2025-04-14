@@ -16,16 +16,15 @@ class DQNNet(nn.Module):
 
         self.embedding = nn.Sequential(
             nn.Embedding(19, 4),
-            nn.Linear(4, 64),
             nn.ReLU(),
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(64 * 2 * 2 + 64, 256),
+            nn.Linear(64 * 2 * 2 + 4, 256),
             nn.ReLU(),
-            nn.Linear(256, 128),
+            nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(128, num_actions),
+            nn.Linear(256, num_actions),
             nn.Sigmoid(),
         )
 
