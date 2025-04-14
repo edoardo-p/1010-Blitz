@@ -66,7 +66,7 @@ def train(
 
     for epoch in range(1, EPOCHS + 1):
         state = state_to_tensor(env.reset(), device)
-        agent.step = epoch
+        agent._step = epoch
 
         while True:
             if render:
@@ -79,23 +79,23 @@ def train(
             reward = torch.tensor(reward, dtype=torch.float32).unsqueeze(0).to(device)
 
             if done:
-                agent.memory.push(state, action, None, reward)
+                agent.add_memory_sample(state, action, None, reward)
                 break
 
             next_state = state_to_tensor(observation, device)
-            agent.memory.push(state, action, next_state, reward)
+            agent.add_memory_sample(state, action, next_state, reward)
             state = next_state
             agent.learn()
 
             # Soft update of the target network's weights
             # θ′ ← τθ + (1 − τ)θ′
-            target_net_state_dict = agent.target_net.state_dict()
-            policy_net_state_dict = agent.policy_net.state_dict()
+            target_net_state_dict = agent._target_net.state_dict()
+            policy_net_state_dict = agent._policy_net.state_dict()
             for key in policy_net_state_dict:
                 target_net_state_dict[key] = policy_net_state_dict[
                     key
                 ] * TAU + target_net_state_dict[key] * (1 - TAU)
-            agent.target_net.load_state_dict(target_net_state_dict)
+            agent._target_net.load_state_dict(target_net_state_dict)
 
             if render:
                 screen.fill(0)
@@ -103,8 +103,8 @@ def train(
                 pygame.display.flip()
 
         if epoch % 500 == 0:
-            torch.save(agent.policy_net.state_dict(), rf"{MODEL_DIR}\policy_net.pth")
-            torch.save(agent.target_net.state_dict(), rf"{MODEL_DIR}\target_net.pth")
+            torch.save(agent._policy_net.state_dict(), rf"{MODEL_DIR}\policy_net.pth")
+            torch.save(agent._target_net.state_dict(), rf"{MODEL_DIR}\target_net.pth")
 
         scores.append(env.score)
         print(f"Epoch: {epoch}, Score: {env.score}")
