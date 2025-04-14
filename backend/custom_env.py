@@ -3,6 +3,8 @@ import random
 from typing import Generator
 
 import gymnasium as gym
+import numpy as np
+from scipy.ndimage import label
 
 from .piece import Piece
 from .tile import Tile
@@ -27,6 +29,7 @@ class Game1010(gym.Env):
         self._tiles = [
             [Tile() for _ in range(self.board_size)] for _ in range(self.board_size)
         ]
+        self._grid_mask = np.zeros((self.board_size, self.board_size), dtype=int)
         self.score = 0
         self.pieces = self._generate_pieces()
         return self._tiles, self.pieces[0]
@@ -42,6 +45,7 @@ class Game1010(gym.Env):
         curr_score = self.score
         for tile_col, tile_row in piece.squares_pos:
             self._tiles[row + tile_row][col + tile_col].update(piece.color)
+            self._grid_mask[row + tile_row][col + tile_col] = 1
         self._clear_lines()
         self.score += len(piece.squares_pos)
 
@@ -50,7 +54,8 @@ class Game1010(gym.Env):
             self.pieces = self._generate_pieces()
 
         done = not any(self.get_moves())
-        reward = self.score - curr_score
+        no_holes_reward = self._reward_large_sections(self._grid_mask)
+        reward = self.score - curr_score + no_holes_reward
         if done:
             reward = -5000
         return (self._tiles, self.pieces[0]), reward, done
@@ -102,6 +107,25 @@ class Game1010(gym.Env):
                     tile.clear()
 
         self.score += 5 * lines * (lines + 1)
+
+    def _reward_large_sections(self, matrix: np.ndarray) -> int:
+        """
+        Calculate a reward for larger contiguous sections of ones in a binary 2D matrix.
+
+        Args:
+            matrix (np.ndarray): A binary 2D matrix (values are 0 or 1).
+
+        Returns:
+            float: The reward based on the size of contiguous sections of ones.
+        """
+        # Label connected components of ones
+        labeled_matrix, _ = label(matrix)
+
+        # Calculate the size of each connected component
+        component_sizes = np.bincount(labeled_matrix.ravel())[1:]
+        reward = sum(size**2 for size in component_sizes)
+
+        return reward
 
     def _get_row(self, row: int) -> list[Tile]:
         return self._tiles[row]
