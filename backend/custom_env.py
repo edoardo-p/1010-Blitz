@@ -1,5 +1,6 @@
 import json
 import random
+from typing import Generator
 
 import gymnasium as gym
 
@@ -54,7 +55,7 @@ class Game1010(gym.Env):
             reward = -100
         return (self._tiles, self.pieces[0]), reward, done
 
-    def get_moves(self):
+    def get_moves(self) -> Generator[tuple[Piece, int, int], None, None]:
         for tile, row, col in self.get_tiles_and_coords():
             if not tile.empty:
                 continue
@@ -63,7 +64,7 @@ class Game1010(gym.Env):
                 if piece and self._check_valid(row, col, piece):
                     yield piece, row, col
 
-    def get_tiles_and_coords(self):
+    def get_tiles_and_coords(self) -> Generator[tuple[Tile, int, int], None, None]:
         for i, row in enumerate(self._tiles):
             for j, tile in enumerate(row):
                 yield tile, i, j
