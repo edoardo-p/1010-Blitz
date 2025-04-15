@@ -10,6 +10,10 @@ MODEL_DIR = r"backend\models\embed_cnn"
 EPOCHS = 1000
 TAU = 0.005
 
+RENDER = True
+TRAIN = True
+
+
 PIECE_HASH_TO_IDX = {
     -8458139203682520985: 0,
     3452360341691682072: 1,
@@ -64,6 +68,7 @@ def train(
 ) -> list[int]:
     scores = []
     render = screen is not None
+    agent.train = True
 
     for epoch in range(1, EPOCHS + 1):
         state = state_to_tensor(env.reset(), device)
@@ -146,10 +151,8 @@ def test(
 
 
 def main():
-    render, to_train = True, True
-
     screen = None
-    if render:
+    if RENDER:
         pygame.init()
         screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
@@ -159,10 +162,9 @@ def main():
         env.board_size * env.board_size * env.max_pieces,
         (env.board_size, env.board_size),
         device,
-        train=to_train,
     )
 
-    if to_train:
+    if TRAIN:
         scores = train(env, agent, device, screen)
         plt.plot(scores)
         plt.show()

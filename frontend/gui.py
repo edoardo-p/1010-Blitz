@@ -23,7 +23,7 @@ def draw_game(
     screen: pygame.surface.Surface, game: Game1010, header: str | None = None
 ) -> None:
     font = pygame.font.Font(None, 50)
-    text = str(game.score) if header == None else header
+    text = str(game.score) if header is None else header
     text_surface = font.render(text, True, pygame.Color(0, 100, 200))
     screen.blit(text_surface, (20, 20))
 
