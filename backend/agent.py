@@ -106,8 +106,7 @@ class DQNAgent:
         # Optimize the model
         self._optimizer.zero_grad()
         loss.backward()
-        # In-place gradient clipping
-        # torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+        torch.nn.utils.clip_grad.clip_grad_value_(self._policy_net.parameters(), 100)
         self._optimizer.step()
 
     def action_to_tuple(self, action: torch.Tensor) -> Action:
