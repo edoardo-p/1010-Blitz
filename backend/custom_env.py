@@ -18,6 +18,10 @@ class Game1010(gym.Env):
         self.board_size = board_size
         self.max_pieces = max_pieces
 
+        # https://gymnasium.farama.org/introduction/create_custom_env/
+        # TODO implement self.observation_space
+        # TODO implement self.action_space
+
         with open(r".\backend\vectors.json", "r") as f:
             self._piece_vectors = json.load(f)
 
