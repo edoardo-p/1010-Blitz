@@ -159,6 +159,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     env = Game1010(max_pieces=1)
     agent = DQNAgent(
+        len(PIECE_HASH_TO_IDX),
         env.board_size * env.board_size * env.max_pieces,
         (env.board_size, env.board_size),
         device,

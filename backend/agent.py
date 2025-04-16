@@ -11,6 +11,7 @@ Action = tuple[int, int, int]
 class DQNAgent:
     def __init__(
         self,
+        num_pieces,
         num_actions,
         state_shape,
         device,
@@ -23,6 +24,7 @@ class DQNAgent:
         memory_size=25000,
         batch_size=256,
     ):
+        self.num_pieces = num_pieces
         self.actions = num_actions
         self.state_shape = state_shape
         self.device = device
@@ -34,8 +36,8 @@ class DQNAgent:
         self._batch_size = batch_size
 
         self._step = 0
-        self._policy_net = DQNNet(num_actions).to(self.device)
-        self._target_net = DQNNet(num_actions).to(self.device)
+        self._policy_net = DQNNet(num_actions, num_pieces).to(self.device)
+        self._target_net = DQNNet(num_actions, num_pieces).to(self.device)
         self._target_net.load_state_dict(self._policy_net.state_dict())
 
         self._optimizer = torch.optim.AdamW(self._policy_net.parameters(), lr=alpha)

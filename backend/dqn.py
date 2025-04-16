@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class DQNNet(nn.Module):
-    def __init__(self, num_actions: int):
+    def __init__(self, num_actions: int, num_pieces: int):
         super().__init__()
 
         self.grid_conv = nn.Sequential(
@@ -15,7 +15,7 @@ class DQNNet(nn.Module):
         )
 
         self.embedding = nn.Sequential(
-            nn.Embedding(19, 4),
+            nn.Embedding(num_pieces, 4),
             nn.ReLU(),
         )
 
