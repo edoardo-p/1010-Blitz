@@ -68,12 +68,6 @@ class DQNAgent:
             device=self.device,
             dtype=torch.bool,
         )
-        next_state_transpose = zip(
-            *(s.next_state for s in transitions if s.next_state is not None)
-        )
-        non_final_next_states = [
-            torch.cat(transpose) for transpose in next_state_transpose
-        ]
 
         state_transpose = zip(*[t.state for t in transitions])
         state_batch = [torch.cat(transpose) for transpose in state_transpose]
@@ -89,12 +83,29 @@ class DQNAgent:
         # Expected values of actions for non_final_next_states are computed based
         # on the "older" target_net; selecting their best reward with max(1).values
         # This is merged based on the mask, such that we'll have either the expected
-        # state value or 0 in case the state was final.
-        next_state_values = torch.zeros(self._batch_size, device=self.device)
+        # state value or -1000 in case the state was final.
+        non_final_next_states = torch.cat(
+            [s.next_state for s in transitions if s.next_state is not None]
+        )
+        num_next_states = non_final_next_states.size()[0]
+        next_state_values = torch.full((self._batch_size,), -1000.0, device=self.device)
+        full_piece_tensors = torch.cat(
+            [
+                torch.full((num_next_states,), piece_idx, device=self.device)
+                for piece_idx in range(self.num_pieces)
+            ]
+        )
         with torch.no_grad():
-            # TODO update next_state_values using the target net but without piece information
+            # the value for each next state is the average over all possible piece occurrences for that state
             next_state_values[non_final_mask] = (
-                self._target_net(*non_final_next_states).max(1).values
+                self._target_net(
+                    torch.vstack([non_final_next_states] * self.num_pieces),
+                    full_piece_tensors,
+                )
+                .reshape(self.num_pieces, num_next_states, -1)
+                .mean(dim=0)
+                .max(dim=1)
+                .values
             )
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self._gamma) + reward_batch
