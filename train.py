@@ -1,17 +1,14 @@
-import pygame
 import torch
+import pygame
+from matplotlib import pyplot as plt
+
 from backend.agent import DQNAgent
 from backend.custom_env import Game1010, State
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
-from matplotlib import pyplot as plt
 
 MODEL_DIR = r"backend\models\embed_cnn"
 EPOCHS = 1000
 TAU = 0.005
-
-RENDER = True
-TRAIN = False
-
 
 PIECE_HASH_TO_IDX = {
     -8458139203682520985: 0,
@@ -35,11 +32,9 @@ PIECE_HASH_TO_IDX = {
     13440965211718712703: 18,
 }
 
-
 def squares_to_idx(squares: list[tuple[int, int]]) -> int:
     hash_sum = sum(hash(tuple(square)) for square in squares)
     return PIECE_HASH_TO_IDX[hash_sum]
-
 
 def state_to_tensor(
     state: State, device: torch.device
@@ -57,8 +52,6 @@ def state_to_tensor(
         .to(device),
     )
 
-
-# TODO move inside agent class
 def train(
     env: Game1010,
     agent: DQNAgent,
@@ -93,7 +86,6 @@ def train(
             agent.learn()
 
             # Soft update of the target network's weights
-            # θ′ ← τθ + (1 − τ)θ′
             target_net_state_dict = agent._target_net.state_dict()
             policy_net_state_dict = agent._policy_net.state_dict()
             for key in policy_net_state_dict:
@@ -116,45 +108,9 @@ def train(
 
     return scores
 
-
-# TODO move inside agent class
-def test(
-    env: Game1010,
-    agent: DQNAgent,
-    device: torch.device,
-    screen: pygame.Surface | None = None,
-):
-    render = screen is not None
-    state = state_to_tensor(env.reset(), device)
-    agent.load(MODEL_DIR)
-    agent.train = False
-
-    while True:
-        action = agent.choose_action(*state)
-        observation, _, done = env.step(*agent.action_to_tuple(action))
-
-        if done:
-            print(f"Final score: {env.score}")
-            break
-
-        next_state = state_to_tensor(observation, device)
-        state = next_state
-
-        if render:
-            screen.fill(0)
-            gui.draw_game(screen, env)
-            pygame.display.flip()
-
-    if render:
-        pygame.quit()
-
-
-def main():
-    screen = None
-    if RENDER:
-        pygame.init()
-        screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-
+if __name__ == "__main__":
+    pygame.init()
+    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     env = Game1010(max_pieces=1)
     agent = DQNAgent(
@@ -163,14 +119,6 @@ def main():
         (env.board_size, env.board_size),
         device,
     )
-
-    if TRAIN:
-        scores = train(env, agent, device, screen)
-        plt.plot(scores)
-        plt.show()
-
-    test(env, agent, device, screen)
-
-
-if __name__ == "__main__":
-    main()
+    scores = train(env, agent, device, screen)
+    plt.plot(scores)
+    plt.show()
