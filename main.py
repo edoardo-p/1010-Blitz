@@ -1,17 +1,16 @@
 import pygame
 import torch
-from matplotlib import pyplot as plt
-
 from backend.agent import DQNAgent
 from backend.custom_env import Game1010, State
 from frontend import WIN_HEIGHT, WIN_WIDTH, gui
+from matplotlib import pyplot as plt
 
 MODEL_DIR = r"backend\models\embed_cnn"
 EPOCHS = 1000
 TAU = 0.005
 
 RENDER = True
-TRAIN = True
+TRAIN = False
 
 
 PIECE_HASH_TO_IDX = {
