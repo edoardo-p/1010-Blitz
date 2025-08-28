@@ -1,4 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pygame
+
 from .parameters import (
     GRID_HEIGHT,
     GRID_X,
@@ -9,15 +14,16 @@ from .parameters import (
     WIN_WIDTH,
 )
 
-from backend.game import Game
-from backend.piece import Piece
+if TYPE_CHECKING:
+    from backend.custom_env import Game1010
+    from backend.piece import Piece
 
 
 def draw_game(
-    screen: pygame.surface.Surface, game: Game, header: str | None = None
+    screen: pygame.surface.Surface, game: Game1010, header: str | None = None
 ) -> None:
     font = pygame.font.Font(None, 50)
-    text = str(game.score) if header == None else header
+    text = str(game.score) if header is None else header
     text_surface = font.render(text, True, pygame.Color(0, 100, 200))
     screen.blit(text_surface, (20, 20))
 
@@ -33,6 +39,10 @@ def draw_game(
             ),
             border_radius=RADIUS,
         )
+
+    for i, piece in enumerate(game.pieces):
+        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
+        draw_piece(screen, piece, 0.5)
 
 
 def draw_piece(
@@ -50,9 +60,3 @@ def draw_piece(
             ),
             border_radius=RADIUS,
         )
-
-
-def draw_piece_menu(screen: pygame.surface.Surface, pieces: list[Piece]):
-    for i, piece in enumerate(pieces):
-        piece.update(WIN_WIDTH * i // 3 + TILE_SIZE * 2, GRID_HEIGHT + TILE_SIZE * 4)
-        draw_piece(screen, piece, 0.5)
